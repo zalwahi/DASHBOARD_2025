@@ -1,5372 +1,644 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Handover Inspection Productivity Dashboard 2025</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #FF4C00;
-            --primary-light: #FFF0E8;
-            --primary-mid: #FF8A5C;
-            --secondary: #FF6B35;
-            --accent: #FFB088;
-            --dark: #1A1A2E;
-            --text: #2D2D3A;
-            --text-light: #6B7280;
-            --bg: #FAFBFC;
-            --card-bg: #FFFFFF;
-            --border: #E5E7EB;
-            --success: #10B981;
-            --warning: #F59E0B;
-            --danger: #EF4444;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-        }
-
-        /* Header */
-        .header {
-            background: var(--primary);
-            color: white;
-            padding: 1.5rem 2rem;
-            box-shadow: 0 4px 20px rgba(255, 76, 0, 0.2);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .header h1 {
-            font-size: 1.5rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
-
-        .header-sub {
-            font-size: 0.85rem;
-            opacity: 0.9;
-            font-weight: 400;
-        }
-
-        .download-btn {
-            background: white;
-            color: var(--primary);
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-        }
-
-        .download-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-        /* Container */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        /* KPI Cards */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.2rem;
-            margin-bottom: 2rem;
-        }
-
-        .kpi-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .kpi-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--primary);
-        }
-
-        .kpi-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(255, 76, 0, 0.12);
-        }
-
-        .kpi-icon {
-            width: 44px;
-            height: 44px;
-            background: var(--primary-light);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary);
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-        }
-
-        .kpi-value {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--dark);
-            letter-spacing: -1px;
-        }
-
-        .kpi-label {
-            font-size: 0.85rem;
-            color: var(--text-light);
-            font-weight: 500;
-            margin-top: 0.25rem;
-        }
-
-        .kpi-change {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-top: 0.5rem;
-            padding: 0.2rem 0.5rem;
-            border-radius: 6px;
-        }
-
-        .kpi-change.positive {
-            background: #D1FAE5;
-            color: var(--success);
-        }
-
-        .kpi-change.negative {
-            background: #FEE2E2;
-            color: var(--danger);
-        }
-
-        /* Section Headers */
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin: 2.5rem 0 1.2rem 0;
-        }
-
-        .section-header h2 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--dark);
-        }
-
-        .section-line {
-            flex: 1;
-            height: 2px;
-            background: linear-gradient(to right, var(--primary), transparent);
-            border-radius: 2px;
-        }
-
-        /* Charts Grid */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .chart-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            border: 1px solid var(--border);
-        }
-
-        .chart-card h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--dark);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .chart-card h3 i {
-            color: var(--primary);
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-        }
-
-        .chart-container.tall {
-            height: 380px;
-        }
-
-        /* Staff Cards Grid */
-        .staff-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .staff-card {
-            background: var(--card-bg);
-            border-radius: 14px;
-            padding: 1.25rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .staff-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(255, 76, 0, 0.1);
-            border-color: var(--primary-mid);
-        }
-
-        .staff-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 0.75rem;
-        }
-
-        .staff-name {
-            font-weight: 700;
-            font-size: 0.95rem;
-            color: var(--dark);
-            line-height: 1.3;
-        }
-
-        .staff-badge {
-            background: var(--primary-light);
-            color: var(--primary);
-            padding: 0.2rem 0.6rem;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .staff-meta {
-            font-size: 0.8rem;
-            color: var(--text-light);
-            margin-bottom: 0.75rem;
-        }
-
-        .staff-meta i {
-            color: var(--primary);
-            margin-right: 0.25rem;
-        }
-
-        .staff-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .stat-box {
-            background: var(--primary-light);
-            border-radius: 8px;
-            padding: 0.5rem;
-            text-align: center;
-        }
-
-        .stat-box.inhouse {
-            background: #F0F9FF;
-        }
-
-        .stat-value {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--dark);
-        }
-
-        .stat-label {
-            font-size: 0.65rem;
-            color: var(--text-light);
-            font-weight: 500;
-        }
-
-        .progress-bar {
-            height: 6px;
-            background: var(--border);
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 0.5rem;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            border-radius: 3px;
-            transition: width 0.5s ease;
-        }
-
-        .progress-fill.low {
-            background: linear-gradient(90deg, var(--warning), #FBBF24);
-        }
-
-        .progress-fill.critical {
-            background: linear-gradient(90deg, var(--danger), #F87171);
-        }
-
-        .util-text {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.75rem;
-            margin-top: 0.25rem;
-            font-weight: 600;
-        }
-
-        .util-text .value {
-            color: var(--primary);
-        }
-
-        /* Tables */
-        .table-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            border: 1px solid var(--border);
-            overflow-x: auto;
-            margin-bottom: 2rem;
-        }
-
-        .table-card h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--dark);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-        }
-
-        thead th {
-            background: var(--primary-light);
-            color: var(--primary);
-            font-weight: 600;
-            text-align: left;
-            padding: 0.75rem 1rem;
-            border-bottom: 2px solid var(--primary);
-            white-space: nowrap;
-        }
-
-        tbody td {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid var(--border);
-            color: var(--text);
-        }
-
-        tbody tr:hover {
-            background: var(--primary-light);
-        }
-
-        .util-pill {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.2rem 0.6rem;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.8rem;
-        }
-
-        .util-pill.high {
-            background: #D1FAE5;
-            color: #059669;
-        }
-
-        .util-pill.medium {
-            background: #FEF3C7;
-            color: #D97706;
-        }
-
-        .util-pill.low {
-            background: #FEE2E2;
-            color: #DC2626;
-        }
-
-        /* Insights Section */
-        .insights-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .insight-card {
-            background: var(--card-bg);
-            border-radius: 14px;
-            padding: 1.25rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            border-left: 4px solid var(--primary);
-        }
-
-        .insight-card h4 {
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: var(--dark);
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .insight-card h4 i {
-            color: var(--primary);
-        }
-
-        .insight-card p {
-            font-size: 0.85rem;
-            color: var(--text-light);
-            line-height: 1.6;
-        }
-
-        .insight-card .highlight {
-            color: var(--primary);
-            font-weight: 700;
-        }
-
-        /* Filters */
-        .filter-bar {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--border);
-            background: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .filter-btn:hover, .filter-btn.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        /* Search */
-        .search-box {
-            width: 100%;
-            max-width: 400px;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-            font-family: inherit;
-        }
-
-        .search-box:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(255, 76, 0, 0.1);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container { padding: 1rem; }
-            .header h1 { font-size: 1.2rem; }
-            .charts-grid { grid-template-columns: 1fr; }
-            .staff-grid { grid-template-columns: 1fr; }
-            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-            .chart-container { height: 250px; }
-            table { font-size: 0.75rem; }
-            th, td { padding: 0.5rem; }
-        }
-
-        @media (max-width: 480px) {
-            .kpi-grid { grid-template-columns: 1fr; }
-            .header-content { flex-direction: column; text-align: center; }
-        }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .animate-in {
-            animation: fadeIn 0.6s ease forwards;
-        }
-
-        .delay-1 { animation-delay: 0.1s; }
-        .delay-2 { animation-delay: 0.2s; }
-        .delay-3 { animation-delay: 0.3s; }
-        .delay-4 { animation-delay: 0.4s; }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--bg);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary-mid);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary);
-        }
-    </style>
-<base target="_blank">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Handover Inspection Productivity Dashboard 2025</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --navy:#1F3864;--navy-mid:#2a4a83;--navy-light:#3a5fa8;
+    --accent:#4A90D9;--accent-light:#7BB8F0;--accent-pale:#E8F4FF;
+    --teal:#2DB8A8;--green:#27AE60;--orange:#F39C12;--red:#E74C3C;
+    --bg:#F7F9FC;--white:#FFFFFF;--border:#DDE4EF;
+    --text:#1a2a44;--muted:#6b7fa3;--light-text:#8899b5;
+  }
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+  /* HEADER */
+  .header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 60%,var(--navy-light) 100%);color:#fff;padding:28px 32px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(31,56,100,.4)}
+  .header-inner{max-width:1600px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+  .header h1{font-size:clamp(1.1rem,2.5vw,1.55rem);font-weight:700;letter-spacing:-.3px}
+  .header h1 span{color:var(--accent-light);font-size:.8em}
+  .header-meta{font-size:.78rem;color:rgba(255,255,255,.65);margin-top:3px}
+  .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .ctrl-label{font-size:.78rem;color:rgba(255,255,255,.7);font-weight:500}
+  select{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;padding:7px 12px;border-radius:8px;font-family:inherit;font-size:.82rem;cursor:pointer;outline:none;backdrop-filter:blur(8px)}
+  select option{background:var(--navy);color:#fff}
+  select:hover{background:rgba(255,255,255,.2)}
+
+  /* LAYOUT */
+  .main{max-width:1600px;margin:0 auto;padding:24px 20px 48px}
+  .section-title{font-size:.72rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+  .mb-6{margin-bottom:24px}
+
+  /* KPI CARDS */
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+  .kpi-card{background:var(--white);border-radius:14px;padding:20px 22px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(31,56,100,.06);transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden}
+  .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--teal))}
+  .kpi-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(31,56,100,.12)}
+  .kpi-label{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px}
+  .kpi-val{font-size:1.8rem;font-weight:700;color:var(--navy);line-height:1}
+  .kpi-sub{font-size:.75rem;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:4px}
+  .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:.7rem;font-weight:600}
+  .badge-green{background:#e6f9f0;color:var(--green)}
+  .badge-orange{background:#fff4e0;color:var(--orange)}
+  .badge-red{background:#fdeaea;color:var(--red)}
+
+  /* CHARTS */
+  .chart-grid{display:grid;gap:16px}
+  .chart-grid-2{grid-template-columns:1fr 1fr}
+  .chart-grid-3{grid-template-columns:2fr 1fr}
+  @media(max-width:900px){.chart-grid-2,.chart-grid-3{grid-template-columns:1fr}}
+  .chart-card{background:var(--white);border-radius:14px;padding:20px 22px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(31,56,100,.06)}
+  .chart-title{font-size:.85rem;font-weight:700;color:var(--navy);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+  .chart-title small{font-size:.72rem;color:var(--muted);font-weight:400}
+  .chart-wrap{position:relative}
+
+  /* TABLES */
+  .table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
+  table{width:100%;border-collapse:collapse;font-size:.8rem}
+  thead tr{background:var(--navy)}
+  thead th{padding:10px 14px;color:#fff;font-weight:600;text-align:left;font-size:.74rem;letter-spacing:.3px;white-space:nowrap}
+  tbody tr{border-bottom:1px solid var(--border)}
+  tbody tr:last-child{border-bottom:none}
+  tbody tr:hover{background:var(--accent-pale)}
+  td{padding:9px 14px;color:var(--text)}
+  td.num{font-family:'DM Mono',monospace;text-align:right}
+  td.util-cell{font-family:'DM Mono',monospace;font-weight:600;text-align:right}
+  .util-bar-wrap{display:flex;align-items:center;gap:8px}
+  .util-bar{height:6px;border-radius:3px;background:var(--border);flex:1;min-width:60px;overflow:hidden}
+  .util-bar-fill{height:100%;border-radius:3px;transition:width .4s}
+  .row-region{background:var(--navy);color:#fff;font-weight:600;font-size:.75rem}
+  .row-region td{color:rgba(255,255,255,.9);padding:7px 14px}
+
+  /* STAFF CARDS */
+  .staff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+  .staff-card{background:var(--white);border-radius:12px;padding:16px 18px;border:1px solid var(--border);box-shadow:0 1px 6px rgba(31,56,100,.06)}
+  .staff-card:hover{box-shadow:0 4px 16px rgba(31,56,100,.12);transform:translateY(-1px);transition:all .2s}
+  .staff-name{font-size:.8rem;font-weight:700;color:var(--navy);margin-bottom:2px;line-height:1.2}
+  .staff-meta{font-size:.7rem;color:var(--muted);margin-bottom:10px}
+  .staff-slots{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .slot-block{background:var(--bg);border-radius:8px;padding:8px 10px}
+  .slot-type{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+  .slot-type.mobile{color:var(--accent)}
+  .slot-type.inhouse{color:var(--teal)}
+  .slot-nums{display:flex;justify-content:space-between;align-items:baseline}
+  .slot-used{font-size:1.1rem;font-weight:700;color:var(--navy)}
+  .slot-open{font-size:.72rem;color:var(--muted)}
+  .slot-progress{height:4px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden}
+  .slot-progress-fill{height:100%;border-radius:2px}
+  .fill-mobile{background:linear-gradient(90deg,var(--accent),var(--accent-light))}
+  .fill-inhouse{background:linear-gradient(90deg,var(--teal),#5ed6ca)}
+  .overall-util{font-size:.72rem;text-align:right;margin-top:6px;color:var(--muted);font-weight:500}
+
+  /* INSIGHTS */
+  .insights-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+  .insight-card{background:var(--white);border-radius:12px;padding:18px 20px;border:1px solid var(--border);border-left:4px solid var(--accent)}
+  .insight-card.warn{border-left-color:var(--orange)}
+  .insight-card.good{border-left-color:var(--green)}
+  .insight-card.bad{border-left-color:var(--red)}
+  .insight-icon{font-size:1.3rem;margin-bottom:8px}
+  .insight-title{font-size:.82rem;font-weight:700;color:var(--navy);margin-bottom:5px}
+  .insight-body{font-size:.76rem;color:var(--muted);line-height:1.55}
+  .insight-body strong{color:var(--text)}
+
+  /* TABS */
+  .tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px}
+  .tab{padding:6px 14px;border-radius:8px;font-size:.78rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--white);color:var(--muted);transition:all .15s}
+  .tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .tab:hover:not(.active){background:var(--accent-pale);border-color:var(--accent)}
+
+  /* FILTER ROW */
+  .filter-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+  .filter-row label{font-size:.75rem;font-weight:600;color:var(--muted)}
+  .filter-select{background:var(--white);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:8px;font-family:inherit;font-size:.78rem;cursor:pointer;outline:none}
+  .filter-select:focus{border-color:var(--accent)}
+
+  /* PAGINATION */
+  .pagination{display:flex;gap:6px;align-items:center;justify-content:center;margin-top:12px;flex-wrap:wrap}
+  .page-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--white);font-size:.75rem;cursor:pointer;color:var(--muted)}
+  .page-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .page-btn:hover:not(.active){background:var(--accent-pale)}
+
+  .no-data{text-align:center;padding:40px;color:var(--muted);font-size:.85rem}
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:var(--bg)}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+  ::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+  @media(max-width:640px){
+    .header-inner{flex-direction:column;align-items:flex-start}
+    .controls{flex-wrap:wrap}
+    .staff-grid{grid-template-columns:1fr}
+    .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  }
+</style>
 </head>
 <body>
-    <header class="header">
-        <div class="header-content">
-            <div>
-                <h1><i class="fas fa-chart-line"></i> Handover Inspection Productivity Dashboard</h1>
-                <div class="header-sub">2025 Annual Report &mdash; 116 Staff Members &mdash; 33 Branches &mdash; 5 Regions</div>
-            </div>
-            <button class="download-btn" onclick="downloadPPTX()">
-                <i class="fas fa-file-powerpoint"></i> Download .pptx
-            </button>
-        </div>
-    </header>
 
-    <div class="container">
-        <!-- KPI Summary -->
-        <div class="kpi-grid">
-            <div class="kpi-card animate-in delay-1">
-                <div class="kpi-icon"><i class="fas fa-calendar-check"></i></div>
-                <div class="kpi-value">209,290</div>
-                <div class="kpi-label">Total Open Slots</div>
-                <div class="kpi-change positive"><i class="fas fa-arrow-up"></i> All Regions</div>
-            </div>
-            <div class="kpi-card animate-in delay-2">
-                <div class="kpi-icon"><i class="fas fa-check-circle"></i></div>
-                <div class="kpi-value">155,384</div>
-                <div class="kpi-label">Total Used Slots</div>
-                <div class="kpi-change positive"><i class="fas fa-arrow-up"></i> 74.2% Utilized</div>
-            </div>
-            <div class="kpi-card animate-in delay-3">
-                <div class="kpi-icon"><i class="fas fa-mobile-alt"></i></div>
-                <div class="kpi-value">80.6%</div>
-                <div class="kpi-label">Mobile Utilization</div>
-                <div class="kpi-change positive"><i class="fas fa-arrow-up"></i> 45,470 Used</div>
-            </div>
-            <div class="kpi-card animate-in delay-4">
-                <div class="kpi-icon"><i class="fas fa-building"></i></div>
-                <div class="kpi-value">71.9%</div>
-                <div class="kpi-label">Inhouse Utilization</div>
-                <div class="kpi-change positive"><i class="fas fa-arrow-up"></i> 109,914 Used</div>
-            </div>
-            <div class="kpi-card animate-in delay-1">
-                <div class="kpi-icon"><i class="fas fa-users"></i></div>
-                <div class="kpi-value">116</div>
-                <div class="kpi-label">Total Staff</div>
-                <div class="kpi-change positive"><i class="fas fa-user-check"></i> 14 Perfect Score</div>
-            </div>
-            <div class="kpi-card animate-in delay-2">
-                <div class="kpi-icon"><i class="fas fa-map-marker-alt"></i></div>
-                <div class="kpi-value">33</div>
-                <div class="kpi-label">Total Branches</div>
-                <div class="kpi-change positive"><i class="fas fa-globe"></i> 5 Regions</div>
-            </div>
-        </div>
-
-        <!-- Key Insights -->
-        <div class="section-header">
-            <h2><i class="fas fa-lightbulb"></i> Key Insights</h2>
-            <div class="section-line"></div>
-        </div>
-
-        <div class="insights-grid">
-            <div class="insight-card">
-                <h4><i class="fas fa-trophy"></i> Top Performing Region</h4>
-                <p><span class="highlight">NORTHERN</span> leads with <span class="highlight">79.9%</span> overall utilization, outperforming all other regions. This region has 23 staff members.</p>
-            </div>
-            <div class="insight-card">
-                <h4><i class="fas fa-exclamation-triangle"></i> Attention Needed</h4>
-                <p><span class="highlight">EAST MALAYSIA</span> has the lowest utilization at <span class="highlight">29.8%</span>, significantly below the company average of 74.2%. Focused intervention recommended.</p>
-            </div>
-            <div class="insight-card">
-                <h4><i class="fas fa-chart-line"></i> Peak Performance</h4>
-                <p>August 2025 recorded the highest overall utilization at <span class="highlight">84.0%</span>, while January 2025 was the lowest at <span class="highlight">65.5%</span>. Seasonal trends suggest Q3 is strongest.</p>
-            </div>
-            <div class="insight-card">
-                <h4><i class="fas fa-star"></i> Perfect Scorers</h4>
-                <p><span class="highlight">14 staff members</span> achieved 100% utilization. Mobile-only staff: 39, Inhouse-only: 40, Mixed: 37.</p>
-            </div>
-            <div class="insight-card">
-                <h4><i class="fas fa-mobile-alt"></i> Mobile vs Inhouse</h4>
-                <p>Mobile slots perform better at <span class="highlight">80.6%</span> vs Inhouse at <span class="highlight">71.9%</span>. The gap of 8.7 percentage points suggests mobile operations are more efficient.</p>
-            </div>
-            <div class="insight-card">
-                <h4><i class="fas fa-building"></i> Top Branch</h4>
-                <p><span class="highlight">KAJANG</span> (KLANG VALLEY) leads branches with <span class="highlight">93.8%</span> utilization across 3 staff.</p>
-            </div>
-        </div>
-
-        <!-- Charts Section -->
-        <div class="section-header">
-            <h2><i class="fas fa-chart-pie"></i> Productivity Analytics</h2>
-            <div class="section-line"></div>
-        </div>
-
-        <div class="charts-grid">
-            <div class="chart-card animate-in">
-                <h3><i class="fas fa-chart-area"></i> Monthly Utilization Trend</h3>
-                <div class="chart-container">
-                    <canvas id="monthlyChart"></canvas>
-                </div>
-            </div>
-            <div class="chart-card animate-in">
-                <h3><i class="fas fa-chart-bar"></i> Regional Comparison</h3>
-                <div class="chart-container">
-                    <canvas id="regionChart"></canvas>
-                </div>
-            </div>
-            <div class="chart-card animate-in">
-                <h3><i class="fas fa-chart-bar"></i> Branch Productivity (Top 15)</h3>
-                <div class="chart-container tall">
-                    <canvas id="branchChart"></canvas>
-                </div>
-            </div>
-            <div class="chart-card animate-in">
-                <h3><i class="fas fa-chart-pie"></i> Slot Distribution by Region</h3>
-                <div class="chart-container">
-                    <canvas id="distributionChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Staff Cards Section -->
-        <div class="section-header">
-            <h2><i class="fas fa-id-card"></i> Team Member Performance</h2>
-            <div class="section-line"></div>
-        </div>
-
-        <div class="filter-bar">
-            <button class="filter-btn active" onclick="filterStaff('all')">All Regions</button>
-            <button class="filter-btn" onclick="filterStaff('KLANG VALLEY')">Klang Valley</button>
-            <button class="filter-btn" onclick="filterStaff('SOUTHERN')">Southern</button>
-            <button class="filter-btn" onclick="filterStaff('NORTHERN')">Northern</button>
-            <button class="filter-btn" onclick="filterStaff('EAST COAST')">East Coast</button>
-            <button class="filter-btn" onclick="filterStaff('EAST MALAYSIA')">East Malaysia</button>
-        </div>
-
-        <input type="text" class="search-box" id="staffSearch" placeholder="🔍 Search by staff name or branch..." onkeyup="searchStaff()">
-
-        <div class="staff-grid" id="staffGrid">
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="amirul aiman bin yahya" data-branch="cheras">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">AMIRUL AIMAN BIN YAHYA</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> CHERAS, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">100.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">1461/1461</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,461 / 1,461 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 100.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">100.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad azli bin mat shafar" data-branch="puchong">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD AZLI BIN MAT SHAFAR</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> PUCHONG, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">100.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">536/536</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 536 / 536 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 100.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">100.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="osman bin ishak" data-branch="glenmarie">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">OSMAN BIN ISHAK</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> GLENMARIE, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">100.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">303/303</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 303 / 303 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 100.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">100.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="mohd zulkifli bin abdullah" data-branch="b. pahat">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHD ZULKIFLI BIN ABDULLAH</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> B. PAHAT, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">100.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">2/2</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">516/516</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 518 / 518 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 100.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">100.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad hanif bin nor abidin" data-branch="tmn megah">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD HANIF BIN NOR ABIDIN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> TMN MEGAH, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">100.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">322/322</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 322 / 322 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 100.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">100.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="mohammad hanis bin daya robi" data-branch="ipoh">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMMAD HANIS BIN DAYA ROBI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> IPOH, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">100.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">943/943</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 943 / 943 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 100.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">100.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="akmal fitri bin ahmad yusni" data-branch="seremban">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">AKMAL FITRI BIN AHMAD YUSNI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> SEREMBAN, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">100.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">1533/1533</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,533 / 1,533 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 100.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">100.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="mohammad shafiq bin jasni" data-branch="p. medan">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMMAD SHAFIQ BIN JASNI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> P. MEDAN, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">100.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">2/2</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">558/558</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 560 / 560 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 100.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">100.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="muhammad imran syakir bin lukman" data-branch="melaka">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD IMRAN SYAKIR BIN LUKMAN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> MELAKA, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">100.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">379/379</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 379 / 379 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 100.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">100.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="mohamad ridzuan bin abdul rahman" data-branch="a. setar">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMAD RIDZUAN BIN ABDUL RAHMAN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> A. SETAR, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">100.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">668/668</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 668 / 668 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 100.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">100.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="EAST COAST" data-name="mohd syafiq ikhwan bin ruzeman" data-branch="kuantan">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHD SYAFIQ IKHWAN BIN RUZEMAN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> KUANTAN, EAST COAST
-                        </div>
-                    </div>
-                    <span class="staff-badge">100.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">440/440</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 440 / 440 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 100.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">100.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="muhammad nur hadi bin zaini" data-branch="jb eco">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD NUR HADI BIN ZAINI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> JB ECO, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">100.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">184/184</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 184 / 184 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 100.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">100.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad rafidi bin ramli" data-branch="kajang">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD RAFIDI BIN RAMLI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> KAJANG, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">100.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">1877/1877</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,877 / 1,877 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 100.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">100.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="marwan bin abdullah" data-branch="p. juru">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MARWAN BIN ABDULLAH</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> P. JURU, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">100.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">481/481</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 481 / 481 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 100.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">100.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhamad firdhaus bin mokhtar" data-branch="pantrans">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMAD FIRDHAUS BIN MOKHTAR</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> PANTRANS, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">98.3%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">1422/1446</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,422 / 1,446 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 98.3%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">98.3%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad afiq hakimi bin abdul rahim" data-branch="pantrans">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD AFIQ HAKIMI BIN ABDUL RAHIM</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> PANTRANS, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">97.2%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">3536/3637</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 3,536 / 3,637 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 97.2%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">97.2%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="muhammad ikhwan bin mohamad nordin" data-branch="p. bayan">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD IKHWAN BIN MOHAMAD NORDIN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> P. BAYAN, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">97.2%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">385/396</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 385 / 396 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 97.2%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">97.2%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad zulhelman bin mohd okhir" data-branch="pantrans">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD ZULHELMAN BIN MOHD OKHIR</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> PANTRANS, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">96.8%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">3/3</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">3509/3625</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 3,512 / 3,628 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 96.8%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">96.8%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="EAST COAST" data-name="ahmad aliff hakim bin shawal" data-branch="k. bharu">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">AHMAD ALIFF HAKIM BIN SHAWAL</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> K. BHARU, EAST COAST
-                        </div>
-                    </div>
-                    <span class="staff-badge">95.5%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">865/906</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 865 / 906 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 95.5%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">95.5%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="syed hatim hakimy bin syed mohamad yusoff khydir" data-branch="cheras">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">SYED HATIM HAKIMY BIN SYED MOHAMAD YUSOFF KHYDIR</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> CHERAS, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">95.1%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">1157/1216</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,157 / 1,216 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 95.1%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">95.1%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad alif bin mat shafar" data-branch="cheras">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD ALIF BIN MAT SHAFAR</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> CHERAS, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">94.6%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">1150/1216</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,150 / 1,216 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 94.6%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">94.6%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="mohamad ikhwan bin rosdi" data-branch="pantrans">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMAD IKHWAN BIN ROSDI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> PANTRANS, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">94.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">3475/3698</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 3,475 / 3,698 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 94.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">94.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad amirul arif bin azman" data-branch="kajang">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD AMIRUL ARIF BIN AZMAN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> KAJANG, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">93.2%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">555/614</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">1571/1668</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 2,126 / 2,282 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 93.2%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">93.2%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhamad amirul adli bin mohd hakam" data-branch="cheras">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMAD AMIRUL ADLI BIN MOHD HAKAM</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> CHERAS, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">91.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">282/305</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">2365/2604</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 2,647 / 2,909 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 91.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">91.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="mohamad asraff bin mohd fadzir" data-branch="jb eco">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMAD ASRAFF BIN MOHD FADZIR</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> JB ECO, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">91.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">64/64</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">3217/3540</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 3,281 / 3,604 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 91.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">91.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="irfan farhan bin irwan fazly" data-branch="cheras">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">IRFAN FARHAN BIN IRWAN FAZLY</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> CHERAS, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">90.8%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">3214/3540</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 3,214 / 3,540 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 90.8%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">90.8%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="putra amir hussin bin anuar" data-branch="pantrans">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">PUTRA AMIR HUSSIN BIN ANUAR</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> PANTRANS, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">90.1%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">1/1</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">3259/3619</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 3,260 / 3,620 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 90.1%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">90.1%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="mohamad aimullah bin mohamad zin" data-branch="pantrans">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMAD AIMULLAH BIN MOHAMAD ZIN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> PANTRANS, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">89.7%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">2413/2690</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 2,413 / 2,690 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 89.7%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">89.7%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad danial bin halim" data-branch="glenmarie">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD DANIAL BIN HALIM</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> GLENMARIE, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">89.6%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">1083/1209</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,083 / 1,209 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 89.6%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">89.6%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="muhammad thazmi bin abdul rahman" data-branch="jb eco">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD THAZMI BIN ABDUL RAHMAN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> JB ECO, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">89.1%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">695/780</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 695 / 780 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 89.1%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">89.1%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="azli zulhelimi bin azmi" data-branch="p. juru">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">AZLI ZULHELIMI BIN AZMI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> P. JURU, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">88.6%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">3135/3540</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 3,135 / 3,540 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 88.6%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">88.6%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad ammil raif bin norazmi" data-branch="s. alam">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD AMMIL RAIF BIN NORAZMI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> S. ALAM, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">87.9%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">282/305</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">2276/2604</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 2,558 / 2,909 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 87.9%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">87.9%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="mohamad syahmi bin rebu" data-branch="ipoh">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMAD SYAHMI BIN REBU</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> IPOH, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">87.5%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">3099/3540</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 3,099 / 3,540 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 87.5%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">87.5%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad aniq hazman bin rosli" data-branch="tmn megah">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD ANIQ HAZMAN BIN ROSLI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> TMN MEGAH, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">87.3%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">3090/3540</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 3,090 / 3,540 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 87.3%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">87.3%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="mohamad sufi bin mohd sabari" data-branch="p. juru">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMAD SUFI BIN MOHD SABARI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> P. JURU, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">87.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">3081/3540</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 3,081 / 3,540 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 87.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">87.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="danish aslam bin zainuddin" data-branch="pantrans">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">DANISH ASLAM BIN ZAINUDDIN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> PANTRANS, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">87.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">2055/2361</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 2,055 / 2,361 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 87.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">87.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="muhammad farhan bin usri" data-branch="jb eco">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD FARHAN BIN USRI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> JB ECO, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">86.7%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">61/61</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">3060/3540</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 3,121 / 3,601 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 86.7%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">86.7%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="mohamad hafizuddin bin ghazali" data-branch="glenmarie">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMAD HAFIZUDDIN BIN GHAZALI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> GLENMARIE, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">86.7%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">3068/3540</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 3,068 / 3,540 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 86.7%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">86.7%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="mohammad amirul haqim bin bakri" data-branch="okr">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMMAD AMIRUL HAQIM BIN BAKRI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> OKR, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">86.6%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">1036/1196</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,036 / 1,196 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 86.6%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">86.6%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="noor rahim bin mohd aris" data-branch="jb eco">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">NOOR RAHIM BIN MOHD ARIS</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> JB ECO, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">86.5%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">180/208</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 180 / 208 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 86.5%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">86.5%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="mohd aliff iskandar bin abdul nasser" data-branch="p. juru">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHD ALIFF ISKANDAR BIN ABDUL NASSER</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> P. JURU, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">86.4%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">1045/1209</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,045 / 1,209 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 86.4%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">86.4%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="mohammad syawal bin abdul razak" data-branch="jb eco">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMMAD SYAWAL BIN ABDUL RAZAK</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> JB ECO, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">86.4%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">1033/1196</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,033 / 1,196 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 86.4%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">86.4%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="mohamad azizi bin salleh" data-branch="jb eco">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMAD AZIZI BIN SALLEH</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> JB ECO, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">86.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">54/54</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">3038/3540</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 3,092 / 3,594 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 86.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">86.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="aiman syahizzad bin khairull" data-branch="s. alam">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">AIMAN SYAHIZZAD BIN KHAIRULL</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> S. ALAM, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">86.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">1038/1207</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,038 / 1,207 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 86.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">86.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad haziq bin khairi" data-branch="setapak">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD HAZIQ BIN KHAIRI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> SETAPAK, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">85.9%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">472/632</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">1116/1216</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,588 / 1,848 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 85.9%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">85.9%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="muhammad irfan hazwan bin halim" data-branch="p. medan">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD IRFAN HAZWAN BIN HALIM</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> P. MEDAN, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">85.8%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">1028/1199</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">3/3</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,031 / 1,202 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 85.8%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">85.8%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad nur aiman bin mohd nurfendi" data-branch="tmn megah">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD NUR AIMAN BIN MOHD NURFENDI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> TMN MEGAH, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">85.6%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">1024/1196</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,024 / 1,196 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 85.6%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">85.6%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="mohd shahrul izam bin mohd jali" data-branch="kajang">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHD SHAHRUL IZAM BIN MOHD JALI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> KAJANG, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">85.5%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">1033/1208</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,033 / 1,208 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 85.5%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">85.5%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="afiq mirza bin romidi" data-branch="glenmarie">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">AFIQ MIRZA BIN ROMIDI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> GLENMARIE, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">85.3%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">1025/1201</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,025 / 1,201 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 85.3%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">85.3%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="muhamad aisar bin mohd nizam" data-branch="p. medan">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMAD AISAR BIN MOHD NIZAM</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> P. MEDAN, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">85.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">1017/1196</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,017 / 1,196 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 85.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">85.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="muhammad aliff iskandar bin mohamed hatal" data-branch="ipoh">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD ALIFF ISKANDAR BIN MOHAMED HATAL</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> IPOH, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">85.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">1026/1207</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,026 / 1,207 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 85.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">85.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad syahiran bin sueilan" data-branch="puchong">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD SYAHIRAN BIN SUEILAN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> PUCHONG, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">84.8%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">1020/1203</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,020 / 1,203 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 84.8%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">84.8%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="danial fakhry bin jani" data-branch="jb eco">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">DANIAL FAKHRY BIN JANI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> JB ECO, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">84.8%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">1014/1196</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,014 / 1,196 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 84.8%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">84.8%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="mohamad normuzamil bin azlan" data-branch="jb eco">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMAD NORMUZAMIL BIN AZLAN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> JB ECO, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">84.7%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">1022/1206</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,022 / 1,206 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 84.7%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">84.7%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="abdul mubin bin hapidz" data-branch="okr">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">ABDUL MUBIN BIN HAPIDZ</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> OKR, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">84.5%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">1756/2079</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,756 / 2,079 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 84.5%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">84.5%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="adli bin amir" data-branch="s. alam">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">ADLI BIN AMIR</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> S. ALAM, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">84.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">1017/1210</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,017 / 1,210 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 84.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">84.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="EAST COAST" data-name="mohamad amirul azreen bin roslan" data-branch="kuantan">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMAD AMIRUL AZREEN BIN ROSLAN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> KUANTAN, EAST COAST
-                        </div>
-                    </div>
-                    <span class="staff-badge">83.6%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">1000/1196</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,000 / 1,196 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 83.6%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">83.6%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="ahmad syawal fikri bin ahmad jafri" data-branch="melawati">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">AHMAD SYAWAL FIKRI BIN AHMAD JAFRI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> MELAWATI, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">83.5%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">693/830</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 693 / 830 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 83.5%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">83.5%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad firdaus bin norizal" data-branch="putrajaya">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD FIRDAUS BIN NORIZAL</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> PUTRAJAYA, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">83.1%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">819/986</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 819 / 986 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 83.1%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">83.1%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="rakin bin mohd ruzi" data-branch="p. medan">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">RAKIN BIN MOHD RUZI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> P. MEDAN, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">83.1%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">2941/3540</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 2,941 / 3,540 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 83.1%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">83.1%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="ahmad dhiyauddin bin roslan" data-branch="glenmarie">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">AHMAD DHIYAUDDIN BIN ROSLAN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> GLENMARIE, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">82.8%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">990/1196</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 990 / 1,196 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 82.8%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">82.8%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="mohamad afiq ikwan bin norizan" data-branch="s. alam">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMAD AFIQ IKWAN BIN NORIZAN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> S. ALAM, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">82.6%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">988/1196</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 988 / 1,196 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 82.6%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">82.6%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="muhammad ammar rafiq bin ismail" data-branch="ipoh">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD AMMAR RAFIQ BIN ISMAIL</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> IPOH, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">82.2%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">982/1196</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">6/6</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 988 / 1,202 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 82.2%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">82.2%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="EAST COAST" data-name="mohamad amir asyraf bin abdul halim" data-branch="kuantan">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMAD AMIR ASYRAF BIN ABDUL HALIM</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> KUANTAN, EAST COAST
-                        </div>
-                    </div>
-                    <span class="staff-badge">82.1%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">985/1200</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 985 / 1,200 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 82.1%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">82.1%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhamad ikram bin nurun azman" data-branch="tmn megah">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMAD IKRAM BIN NURUN AZMAN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> TMN MEGAH, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">81.7%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">977/1196</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 977 / 1,196 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 81.7%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">81.7%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="hasrulazwan bin hassan" data-branch="jb eco">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">HASRULAZWAN BIN HASSAN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> JB ECO, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">81.2%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">507/624</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 507 / 624 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 81.2%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">81.2%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="EAST COAST" data-name="muhammad fazrul bin hasni" data-branch="kuantan">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD FAZRUL BIN HASNI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> KUANTAN, EAST COAST
-                        </div>
-                    </div>
-                    <span class="staff-badge">80.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">2833/3540</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 2,833 / 3,540 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill " style="width: 80.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">80.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="muhammad fadhilah bin baharin" data-branch="melaka">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD FADHILAH BIN BAHARIN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> MELAKA, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">79.7%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">2821/3540</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 2,821 / 3,540 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 79.7%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">79.7%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="muhammad hanif hizwan bin md halid" data-branch="jb eco">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD HANIF HIZWAN BIN MD HALID</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> JB ECO, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">79.6%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">4/4</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">1576/1980</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,580 / 1,984 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 79.6%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">79.6%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad nabil mubasyir bin mohd zamri" data-branch="selayang">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD NABIL MUBASYIR BIN MOHD ZAMRI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> SELAYANG, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">79.3%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">949/1196</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 949 / 1,196 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 79.3%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">79.3%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="abdul rahim bin sabrun" data-branch="okr">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">ABDUL RAHIM BIN SABRUN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> OKR, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">79.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">943/1196</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">7/7</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 950 / 1,203 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 79.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">79.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="sharwin pillai a/l kalaichelvan" data-branch="sg. buloh">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">SHARWIN PILLAI A/L KALAICHELVAN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> SG. BULOH, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">78.6%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">783/996</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 783 / 996 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 78.6%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">78.6%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad hamirul hakim" data-branch="selayang">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD HAMIRUL HAKIM</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> SELAYANG, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">77.9%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">932/1197</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 932 / 1,197 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 77.9%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">77.9%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="mohamad razif bin abdul rahim" data-branch="selayang">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMAD RAZIF BIN ABDUL RAHIM</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> SELAYANG, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">77.6%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">549/607</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">1216/1668</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,765 / 2,275 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 77.6%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">77.6%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad ikhmal bin mohd razi" data-branch="selayang">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD IKHMAL BIN MOHD RAZI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> SELAYANG, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">77.6%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">1535/1978</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,535 / 1,978 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 77.6%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">77.6%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="mohd izzat bin ghazali" data-branch="s. alam">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHD IZZAT BIN GHAZALI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> S. ALAM, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">77.3%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">1584/2050</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,584 / 2,050 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 77.3%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">77.3%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="muhammad najmi bin mohd zaki" data-branch="p. juru">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD NAJMI BIN MOHD ZAKI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> P. JURU, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">76.9%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">160/208</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 160 / 208 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 76.9%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">76.9%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="muhammad shahid bin suhai" data-branch="melaka">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD SHAHID BIN SUHAI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> MELAKA, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">76.5%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">912/1196</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">13/13</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 925 / 1,209 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 76.5%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">76.5%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad aizat helmy bin abu hassan" data-branch="puchong">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD AIZAT HELMY BIN ABU HASSAN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> PUCHONG, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">76.4%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">2706/3540</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 2,706 / 3,540 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 76.4%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">76.4%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="muhamad fazli bin ab hamid" data-branch="jb eco">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMAD FAZLI BIN AB HAMID</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> JB ECO, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">76.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">158/208</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 158 / 208 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 76.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">76.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="shukhaizi bin misbah" data-branch="p. south">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">SHUKHAIZI BIN MISBAH</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> P. SOUTH, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">76.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">158/208</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 158 / 208 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 76.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">76.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="mohamad hafizulhilmy bin maseran" data-branch="jb eco">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMAD HAFIZULHILMY BIN MASERAN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> JB ECO, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">75.8%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">473/624</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 473 / 624 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 75.8%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">75.8%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="muhammad nurkamaluddin bin mohd ahirwa" data-branch="b. pahat">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD NURKAMALUDDIN BIN MOHD AHIRWA</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> B. PAHAT, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">75.4%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">901/1199</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">13/13</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 914 / 1,212 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 75.4%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">75.4%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="mohammad mazzuan haqimi bin zamri" data-branch="seremban">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMMAD MAZZUAN HAQIMI BIN ZAMRI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> SEREMBAN, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">74.6%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">893/1199</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">8/8</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 901 / 1,207 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 74.6%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">74.6%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="muhammad muhaimin bin shaiful zam zam" data-branch="melaka">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD MUHAIMIN BIN SHAIFUL ZAM ZAM</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> MELAKA, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">74.5%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">889/1196</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">7/7</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 896 / 1,203 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 74.5%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">74.5%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="muhammad ammar bin bahri" data-branch="sg. petani">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD AMMAR BIN BAHRI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> SG. PETANI, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">72.9%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">774/1062</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 774 / 1,062 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 72.9%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">72.9%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="ahmad thalha bin pisal" data-branch="seremban">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">AHMAD THALHA BIN PISAL</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> SEREMBAN, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">72.7%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">2572/3540</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 2,572 / 3,540 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 72.7%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">72.7%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="khoirul rijal bin abd hamid khan" data-branch="ampang">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">KHOIRUL RIJAL BIN ABD HAMID KHAN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> AMPANG, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">71.5%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">728/1018</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 728 / 1,018 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 71.5%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">71.5%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="muhammad firdaus bin maselan" data-branch="p. bayan">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD FIRDAUS BIN MASELAN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> P. BAYAN, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">71.4%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">482/528</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">1086/1668</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,568 / 2,196 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 71.4%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">71.4%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="khairul abid bin khairi" data-branch="p. juru">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">KHAIRUL ABID BIN KHAIRI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> P. JURU, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">71.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">847/1196</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">8/8</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 855 / 1,204 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 71.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">71.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="ku muhammad adam bin ku mohd rozi" data-branch="a. setar">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">KU MUHAMMAD ADAM BIN KU MOHD ROZI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> A. SETAR, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">69.3%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">2453/3540</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 2,453 / 3,540 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 69.3%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">69.3%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad ikhmal hakim bin m.hiduwan" data-branch="sg. buloh">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD IKHMAL HAKIM BIN M.HIDUWAN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> SG. BULOH, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">68.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">534/532</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">962/1668</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,496 / 2,200 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 68.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">68.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="mohd syafiq bin mohd faisal" data-branch="p. bayan">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHD SYAFIQ BIN MOHD FAISAL</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> P. BAYAN, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">66.1%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">15/19</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">1315/1993</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,330 / 2,012 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 66.1%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">66.1%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="mohammad faiz bin izhar" data-branch="pantrans">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMMAD FAIZ BIN IZHAR</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> PANTRANS, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">64.9%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">1528/2356</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,528 / 2,356 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 64.9%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">64.9%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="EAST COAST" data-name="qusyairy daniel bin yusdy" data-branch="k. bharu">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">QUSYAIRY DANIEL BIN YUSDY</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> K. BHARU, EAST COAST
-                        </div>
-                    </div>
-                    <span class="staff-badge">64.0%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">6/6</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">2264/3540</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 2,270 / 3,546 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 64.0%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">64.0%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="muhammad annas bin mohd yusoff" data-branch="a. setar">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD ANNAS BIN MOHD YUSOFF</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> A. SETAR, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">63.9%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">764/1196</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 764 / 1,196 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 63.9%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">63.9%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="mohd hanif bin jamaludin" data-branch="p. bayan">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHD HANIF BIN JAMALUDIN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> P. BAYAN, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">63.7%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">148/245</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">22/22</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 170 / 267 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 63.7%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">63.7%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad isma syukran bin azman" data-branch="s. alam">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD ISMA SYUKRAN BIN AZMAN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> S. ALAM, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">63.5%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">132/208</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 132 / 208 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 63.5%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">63.5%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="EAST COAST" data-name="arif sufi bin mohamed" data-branch="k. terengganu">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">ARIF SUFI BIN MOHAMED</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> K. TERENGGANU, EAST COAST
-                        </div>
-                    </div>
-                    <span class="staff-badge">59.9%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">402/694</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">35/35</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 437 / 729 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 59.9%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">59.9%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="EAST MALAYSIA" data-name="ronald majin" data-branch="k. kinabalu">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">RONALD MAJIN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> K. KINABALU, EAST MALAYSIA
-                        </div>
-                    </div>
-                    <span class="staff-badge">59.6%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">429/720</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 429 / 720 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 59.6%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">59.6%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="EAST COAST" data-name="adib wa'ie bin mohamad ghani" data-branch="k. terengganu">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">ADIB WA'IE BIN MOHAMAD GHANI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> K. TERENGGANU, EAST COAST
-                        </div>
-                    </div>
-                    <span class="staff-badge">58.4%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">307/372</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">1154/2130</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,461 / 2,502 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 58.4%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">58.4%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="NORTHERN" data-name="muhammad zafran bin zamri" data-branch="sg. petani">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD ZAFRAN BIN ZAMRI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> SG. PETANI, NORTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">55.3%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">383/416</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">941/1980</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,324 / 2,396 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 55.3%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">55.3%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="muhammad sauqi bin jamaludin" data-branch="b. pahat">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD SAUQI BIN JAMALUDIN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> B. PAHAT, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">54.5%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">1928/3540</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,928 / 3,540 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill low" style="width: 54.5%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">54.5%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad shazwan shafiq bin mohd yusni" data-branch="okr">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD SHAZWAN SHAFIQ BIN MOHD YUSNI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> OKR, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">47.9%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">678/1416</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 678 / 1,416 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill critical" style="width: 47.9%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">47.9%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="muhammad rusydi bin azman" data-branch="muar">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD RUSYDI BIN AZMAN</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> MUAR, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">46.1%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">481/1068</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">21/21</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 502 / 1,089 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill critical" style="width: 46.1%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">46.1%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad ariffin bin muhammad siddiq ravishanker" data-branch="setapak">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD ARIFFIN BIN MUHAMMAD SIDDIQ RAVISHANKER</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> SETAPAK, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">44.5%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">430/567</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">564/1668</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 994 / 2,235 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill critical" style="width: 44.5%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">44.5%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="EAST MALAYSIA" data-name="mohd firdaus yakup" data-branch="kuching">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHD FIRDAUS YAKUP</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> KUCHING, EAST MALAYSIA
-                        </div>
-                    </div>
-                    <span class="staff-badge">39.3%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">382/972</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 382 / 972 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill critical" style="width: 39.3%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">39.3%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="EAST MALAYSIA" data-name="muhammad islan bin tiblani" data-branch="k. kinabalu">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD ISLAN BIN TIBLANI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> K. KINABALU, EAST MALAYSIA
-                        </div>
-                    </div>
-                    <span class="staff-badge">36.5%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">222/262</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">737/2364</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 959 / 2,626 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill critical" style="width: 36.5%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">36.5%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad zuqni bin mahmud" data-branch="p. south">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD ZUQNI BIN MAHMUD</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> P. SOUTH, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">35.9%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">163/176</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">948/2916</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,111 / 3,092 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill critical" style="width: 35.9%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">35.9%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="mohamad shahrul haikal bin anuar" data-branch="pj midtown">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHAMAD SHAHRUL HAIKAL BIN ANUAR</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> PJ MIDTOWN, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">33.6%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">75/104</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">1046/3228</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,121 / 3,332 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill critical" style="width: 33.6%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">33.6%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="ahmad zakwan bin hisham" data-branch="ampang">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">AHMAD ZAKWAN BIN HISHAM</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> AMPANG, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">33.5%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">1185/3540</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,185 / 3,540 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill critical" style="width: 33.5%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">33.5%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="EAST MALAYSIA" data-name="riduan bin raiming" data-branch="tawau">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">RIDUAN BIN RAIMING</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> TAWAU, EAST MALAYSIA
-                        </div>
-                    </div>
-                    <span class="staff-badge">30.4%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">264/449</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">455/1920</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 719 / 2,369 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill critical" style="width: 30.4%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">30.4%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhammad farid bin mohammad johari" data-branch="putrajaya">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHAMMAD FARID BIN MOHAMMAD JOHARI</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> PUTRAJAYA, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">29.7%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">1045/3516</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 1,045 / 3,516 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill critical" style="width: 29.7%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">29.7%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="SOUTHERN" data-name="mohd hanif bin mohd yazid" data-branch="muar">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MOHD HANIF BIN MOHD YAZID</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> MUAR, SOUTHERN
-                        </div>
-                    </div>
-                    <span class="staff-badge">21.4%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">0/0</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">753/3516</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 753 / 3,516 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill critical" style="width: 21.4%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">21.4%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="KLANG VALLEY" data-name="muhd hafizuddin bin latif" data-branch="melawati">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">MUHD HAFIZUDDIN BIN LATIF</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> MELAWATI, KLANG VALLEY
-                        </div>
-                    </div>
-                    <span class="staff-badge">21.1%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">150/144</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">487/2868</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 637 / 3,012 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill critical" style="width: 21.1%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">21.1%</span>
-                </div>
-            </div>
-
-            <div class="staff-card animate-in" data-region="EAST MALAYSIA" data-name="kelvin kalang anak gura" data-branch="kuching">
-                <div class="staff-header">
-                    <div>
-                        <div class="staff-name">KELVIN KALANG ANAK GURA</div>
-                        <div class="staff-meta">
-                            <i class="fas fa-map-marker-alt"></i> KUCHING, EAST MALAYSIA
-                        </div>
-                    </div>
-                    <span class="staff-badge">15.4%</span>
-                </div>
-                <div class="staff-stats">
-                    <div class="stat-box">
-                        <div class="stat-value">16/16</div>
-                        <div class="stat-label">Mobile Slots</div>
-                    </div>
-                    <div class="stat-box inhouse">
-                        <div class="stat-value">522/3468</div>
-                        <div class="stat-label">Inhouse Slots</div>
-                    </div>
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.25rem;">
-                    Total: 538 / 3,484 slots
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill critical" style="width: 15.4%"></div>
-                </div>
-                <div class="util-text">
-                    <span>Utilization</span>
-                    <span class="value">15.4%</span>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Branch Productivity Table -->
-        <div class="section-header">
-            <h2><i class="fas fa-table"></i> Branch Productivity Breakdown</h2>
-            <div class="section-line"></div>
-        </div>
-
-        <div class="table-card">
-            <h3><i class="fas fa-building"></i> Branch Performance by Region</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Region</th>
-                        <th>Branch</th>
-                        <th>Staff</th>
-                        <th>Open Mobile</th>
-                        <th>Used Mobile</th>
-                        <th>Mobile %</th>
-                        <th>Open Inhouse</th>
-                        <th>Used Inhouse</th>
-                        <th>Inhouse %</th>
-                        <th>Total Open</th>
-                        <th>Total Used</th>
-                        <th>Overall %</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <td><strong>KLANG VALLEY</strong></td>
-                        <td>KAJANG</td>
-                        <td style="text-align:center">3</td>
-                        <td style="text-align:right">1,822</td>
-                        <td style="text-align:right">1,588</td>
-                        <td><span class="util-pill high">87.2%</span></td>
-                        <td style="text-align:right">3,545</td>
-                        <td style="text-align:right">3,448</td>
-                        <td><span class="util-pill high">97.3%</span></td>
-                        <td style="text-align:right"><strong>5,367</strong></td>
-                        <td style="text-align:right"><strong>5,036</strong></td>
-                        <td><span class="util-pill high">93.8%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>KLANG VALLEY</strong></td>
-                        <td>CHERAS</td>
-                        <td style="text-align:center">5</td>
-                        <td style="text-align:right">2,737</td>
-                        <td style="text-align:right">2,589</td>
-                        <td><span class="util-pill high">94.6%</span></td>
-                        <td style="text-align:right">7,605</td>
-                        <td style="text-align:right">7,040</td>
-                        <td><span class="util-pill high">92.6%</span></td>
-                        <td style="text-align:right"><strong>10,342</strong></td>
-                        <td style="text-align:right"><strong>9,629</strong></td>
-                        <td><span class="util-pill high">93.1%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>KLANG VALLEY</strong></td>
-                        <td>PANTRANS</td>
-                        <td style="text-align:center">8</td>
-                        <td style="text-align:right">4</td>
-                        <td style="text-align:right">4</td>
-                        <td><span class="util-pill high">100.0%</span></td>
-                        <td style="text-align:right">23,432</td>
-                        <td style="text-align:right">21,197</td>
-                        <td><span class="util-pill high">90.5%</span></td>
-                        <td style="text-align:right"><strong>23,436</strong></td>
-                        <td style="text-align:right"><strong>21,201</strong></td>
-                        <td><span class="util-pill high">90.5%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>NORTHERN</strong></td>
-                        <td>IPOH</td>
-                        <td style="text-align:center">4</td>
-                        <td style="text-align:right">2,403</td>
-                        <td style="text-align:right">2,008</td>
-                        <td><span class="util-pill high">83.6%</span></td>
-                        <td style="text-align:right">4,489</td>
-                        <td style="text-align:right">4,048</td>
-                        <td><span class="util-pill high">90.2%</span></td>
-                        <td style="text-align:right"><strong>6,892</strong></td>
-                        <td style="text-align:right"><strong>6,056</strong></td>
-                        <td><span class="util-pill high">87.9%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>KLANG VALLEY</strong></td>
-                        <td>GLENMARIE</td>
-                        <td style="text-align:center">5</td>
-                        <td style="text-align:right">3,606</td>
-                        <td style="text-align:right">3,098</td>
-                        <td><span class="util-pill high">85.9%</span></td>
-                        <td style="text-align:right">3,843</td>
-                        <td style="text-align:right">3,371</td>
-                        <td><span class="util-pill high">87.7%</span></td>
-                        <td style="text-align:right"><strong>7,449</strong></td>
-                        <td style="text-align:right"><strong>6,469</strong></td>
-                        <td><span class="util-pill high">86.8%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>KLANG VALLEY</strong></td>
-                        <td>TMN MEGAH</td>
-                        <td style="text-align:center">4</td>
-                        <td style="text-align:right">2,392</td>
-                        <td style="text-align:right">2,001</td>
-                        <td><span class="util-pill high">83.7%</span></td>
-                        <td style="text-align:right">3,862</td>
-                        <td style="text-align:right">3,412</td>
-                        <td><span class="util-pill high">88.3%</span></td>
-                        <td style="text-align:right"><strong>6,254</strong></td>
-                        <td style="text-align:right"><strong>5,413</strong></td>
-                        <td><span class="util-pill high">86.6%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>NORTHERN</strong></td>
-                        <td>P. JURU</td>
-                        <td style="text-align:center">6</td>
-                        <td style="text-align:right">2,613</td>
-                        <td style="text-align:right">2,052</td>
-                        <td><span class="util-pill medium">78.5%</span></td>
-                        <td style="text-align:right">7,569</td>
-                        <td style="text-align:right">6,705</td>
-                        <td><span class="util-pill high">88.6%</span></td>
-                        <td style="text-align:right"><strong>10,182</strong></td>
-                        <td style="text-align:right"><strong>8,757</strong></td>
-                        <td><span class="util-pill high">86.0%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>SOUTHERN</strong></td>
-                        <td>JB ECO</td>
-                        <td style="text-align:center">13</td>
-                        <td style="text-align:right">4,977</td>
-                        <td style="text-align:right">4,285</td>
-                        <td><span class="util-pill high">86.1%</span></td>
-                        <td style="text-align:right">14,032</td>
-                        <td style="text-align:right">12,055</td>
-                        <td><span class="util-pill high">85.9%</span></td>
-                        <td style="text-align:right"><strong>19,009</strong></td>
-                        <td style="text-align:right"><strong>16,340</strong></td>
-                        <td><span class="util-pill high">86.0%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>NORTHERN</strong></td>
-                        <td>P. MEDAN</td>
-                        <td style="text-align:center">4</td>
-                        <td style="text-align:right">2,397</td>
-                        <td style="text-align:right">2,047</td>
-                        <td><span class="util-pill high">85.4%</span></td>
-                        <td style="text-align:right">4,101</td>
-                        <td style="text-align:right">3,502</td>
-                        <td><span class="util-pill high">85.4%</span></td>
-                        <td style="text-align:right"><strong>6,498</strong></td>
-                        <td style="text-align:right"><strong>5,549</strong></td>
-                        <td><span class="util-pill high">85.4%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>KLANG VALLEY</strong></td>
-                        <td>S. ALAM</td>
-                        <td style="text-align:center">6</td>
-                        <td style="text-align:right">4,126</td>
-                        <td style="text-align:right">3,457</td>
-                        <td><span class="util-pill high">83.8%</span></td>
-                        <td style="text-align:right">4,654</td>
-                        <td style="text-align:right">3,860</td>
-                        <td><span class="util-pill high">82.9%</span></td>
-                        <td style="text-align:right"><strong>8,780</strong></td>
-                        <td style="text-align:right"><strong>7,317</strong></td>
-                        <td><span class="util-pill high">83.3%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>EAST COAST</strong></td>
-                        <td>KUANTAN</td>
-                        <td style="text-align:center">4</td>
-                        <td style="text-align:right">2,396</td>
-                        <td style="text-align:right">1,985</td>
-                        <td><span class="util-pill high">82.8%</span></td>
-                        <td style="text-align:right">3,980</td>
-                        <td style="text-align:right">3,273</td>
-                        <td><span class="util-pill high">82.2%</span></td>
-                        <td style="text-align:right"><strong>6,376</strong></td>
-                        <td style="text-align:right"><strong>5,258</strong></td>
-                        <td><span class="util-pill high">82.5%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>KLANG VALLEY</strong></td>
-                        <td>PUCHONG</td>
-                        <td style="text-align:center">3</td>
-                        <td style="text-align:right">1,203</td>
-                        <td style="text-align:right">1,020</td>
-                        <td><span class="util-pill high">84.8%</span></td>
-                        <td style="text-align:right">4,076</td>
-                        <td style="text-align:right">3,242</td>
-                        <td><span class="util-pill medium">79.5%</span></td>
-                        <td style="text-align:right"><strong>5,279</strong></td>
-                        <td style="text-align:right"><strong>4,262</strong></td>
-                        <td><span class="util-pill high">80.7%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>SOUTHERN</strong></td>
-                        <td>SEREMBAN</td>
-                        <td style="text-align:center">3</td>
-                        <td style="text-align:right">1,199</td>
-                        <td style="text-align:right">893</td>
-                        <td><span class="util-pill medium">74.5%</span></td>
-                        <td style="text-align:right">5,081</td>
-                        <td style="text-align:right">4,113</td>
-                        <td><span class="util-pill high">80.9%</span></td>
-                        <td style="text-align:right"><strong>6,280</strong></td>
-                        <td style="text-align:right"><strong>5,006</strong></td>
-                        <td><span class="util-pill medium">79.7%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>SOUTHERN</strong></td>
-                        <td>MELAKA</td>
-                        <td style="text-align:center">4</td>
-                        <td style="text-align:right">2,392</td>
-                        <td style="text-align:right">1,801</td>
-                        <td><span class="util-pill medium">75.3%</span></td>
-                        <td style="text-align:right">3,939</td>
-                        <td style="text-align:right">3,220</td>
-                        <td><span class="util-pill high">81.7%</span></td>
-                        <td style="text-align:right"><strong>6,331</strong></td>
-                        <td style="text-align:right"><strong>5,021</strong></td>
-                        <td><span class="util-pill medium">79.3%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>KLANG VALLEY</strong></td>
-                        <td>SELAYANG</td>
-                        <td style="text-align:center">4</td>
-                        <td style="text-align:right">3,000</td>
-                        <td style="text-align:right">2,430</td>
-                        <td><span class="util-pill high">81.0%</span></td>
-                        <td style="text-align:right">3,646</td>
-                        <td style="text-align:right">2,751</td>
-                        <td><span class="util-pill medium">75.5%</span></td>
-                        <td style="text-align:right"><strong>6,646</strong></td>
-                        <td style="text-align:right"><strong>5,181</strong></td>
-                        <td><span class="util-pill medium">78.0%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>KLANG VALLEY</strong></td>
-                        <td>OKR</td>
-                        <td style="text-align:center">4</td>
-                        <td style="text-align:right">2,392</td>
-                        <td style="text-align:right">1,979</td>
-                        <td><span class="util-pill high">82.7%</span></td>
-                        <td style="text-align:right">3,502</td>
-                        <td style="text-align:right">2,441</td>
-                        <td><span class="util-pill medium">69.7%</span></td>
-                        <td style="text-align:right"><strong>5,894</strong></td>
-                        <td style="text-align:right"><strong>4,420</strong></td>
-                        <td><span class="util-pill medium">75.0%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>NORTHERN</strong></td>
-                        <td>A. SETAR</td>
-                        <td style="text-align:center">3</td>
-                        <td style="text-align:right">1,196</td>
-                        <td style="text-align:right">764</td>
-                        <td><span class="util-pill medium">63.9%</span></td>
-                        <td style="text-align:right">4,208</td>
-                        <td style="text-align:right">3,121</td>
-                        <td><span class="util-pill medium">74.2%</span></td>
-                        <td style="text-align:right"><strong>5,404</strong></td>
-                        <td style="text-align:right"><strong>3,885</strong></td>
-                        <td><span class="util-pill medium">71.9%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>KLANG VALLEY</strong></td>
-                        <td>SG. BULOH</td>
-                        <td style="text-align:center">2</td>
-                        <td style="text-align:right">1,528</td>
-                        <td style="text-align:right">1,317</td>
-                        <td><span class="util-pill high">86.2%</span></td>
-                        <td style="text-align:right">1,668</td>
-                        <td style="text-align:right">962</td>
-                        <td><span class="util-pill medium">57.7%</span></td>
-                        <td style="text-align:right"><strong>3,196</strong></td>
-                        <td style="text-align:right"><strong>2,279</strong></td>
-                        <td><span class="util-pill medium">71.3%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>NORTHERN</strong></td>
-                        <td>P. BAYAN</td>
-                        <td style="text-align:center">4</td>
-                        <td style="text-align:right">1,188</td>
-                        <td style="text-align:right">1,030</td>
-                        <td><span class="util-pill high">86.7%</span></td>
-                        <td style="text-align:right">3,683</td>
-                        <td style="text-align:right">2,423</td>
-                        <td><span class="util-pill medium">65.8%</span></td>
-                        <td style="text-align:right"><strong>4,871</strong></td>
-                        <td style="text-align:right"><strong>3,453</strong></td>
-                        <td><span class="util-pill medium">70.9%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>EAST COAST</strong></td>
-                        <td>K. BHARU</td>
-                        <td style="text-align:center">2</td>
-                        <td style="text-align:right">912</td>
-                        <td style="text-align:right">871</td>
-                        <td><span class="util-pill high">95.5%</span></td>
-                        <td style="text-align:right">3,540</td>
-                        <td style="text-align:right">2,264</td>
-                        <td><span class="util-pill medium">64.0%</span></td>
-                        <td style="text-align:right"><strong>4,452</strong></td>
-                        <td style="text-align:right"><strong>3,135</strong></td>
-                        <td><span class="util-pill medium">70.4%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>SOUTHERN</strong></td>
-                        <td>B. PAHAT</td>
-                        <td style="text-align:center">3</td>
-                        <td style="text-align:right">1,201</td>
-                        <td style="text-align:right">903</td>
-                        <td><span class="util-pill medium">75.2%</span></td>
-                        <td style="text-align:right">4,069</td>
-                        <td style="text-align:right">2,457</td>
-                        <td><span class="util-pill medium">60.4%</span></td>
-                        <td style="text-align:right"><strong>5,270</strong></td>
-                        <td style="text-align:right"><strong>3,360</strong></td>
-                        <td><span class="util-pill medium">63.8%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>KLANG VALLEY</strong></td>
-                        <td>SETAPAK</td>
-                        <td style="text-align:center">2</td>
-                        <td style="text-align:right">1,199</td>
-                        <td style="text-align:right">902</td>
-                        <td><span class="util-pill medium">75.2%</span></td>
-                        <td style="text-align:right">2,884</td>
-                        <td style="text-align:right">1,680</td>
-                        <td><span class="util-pill medium">58.3%</span></td>
-                        <td style="text-align:right"><strong>4,083</strong></td>
-                        <td style="text-align:right"><strong>2,582</strong></td>
-                        <td><span class="util-pill medium">63.2%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>NORTHERN</strong></td>
-                        <td>SG. PETANI</td>
-                        <td style="text-align:center">2</td>
-                        <td style="text-align:right">1,478</td>
-                        <td style="text-align:right">1,157</td>
-                        <td><span class="util-pill medium">78.3%</span></td>
-                        <td style="text-align:right">1,980</td>
-                        <td style="text-align:right">941</td>
-                        <td><span class="util-pill low">47.5%</span></td>
-                        <td style="text-align:right"><strong>3,458</strong></td>
-                        <td style="text-align:right"><strong>2,098</strong></td>
-                        <td><span class="util-pill medium">60.7%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>EAST COAST</strong></td>
-                        <td>K. TERENGGANU</td>
-                        <td style="text-align:center">2</td>
-                        <td style="text-align:right">1,066</td>
-                        <td style="text-align:right">709</td>
-                        <td><span class="util-pill medium">66.5%</span></td>
-                        <td style="text-align:right">2,165</td>
-                        <td style="text-align:right">1,189</td>
-                        <td><span class="util-pill medium">54.9%</span></td>
-                        <td style="text-align:right"><strong>3,231</strong></td>
-                        <td style="text-align:right"><strong>1,898</strong></td>
-                        <td><span class="util-pill medium">58.7%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>KLANG VALLEY</strong></td>
-                        <td>AMPANG</td>
-                        <td style="text-align:center">2</td>
-                        <td style="text-align:right">1,018</td>
-                        <td style="text-align:right">728</td>
-                        <td><span class="util-pill medium">71.5%</span></td>
-                        <td style="text-align:right">3,540</td>
-                        <td style="text-align:right">1,185</td>
-                        <td><span class="util-pill low">33.5%</span></td>
-                        <td style="text-align:right"><strong>4,558</strong></td>
-                        <td style="text-align:right"><strong>1,913</strong></td>
-                        <td><span class="util-pill low">42.0%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>EAST MALAYSIA</strong></td>
-                        <td>K. KINABALU</td>
-                        <td style="text-align:center">2</td>
-                        <td style="text-align:right">982</td>
-                        <td style="text-align:right">651</td>
-                        <td><span class="util-pill medium">66.3%</span></td>
-                        <td style="text-align:right">2,364</td>
-                        <td style="text-align:right">737</td>
-                        <td><span class="util-pill low">31.2%</span></td>
-                        <td style="text-align:right"><strong>3,346</strong></td>
-                        <td style="text-align:right"><strong>1,388</strong></td>
-                        <td><span class="util-pill low">41.5%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>KLANG VALLEY</strong></td>
-                        <td>PUTRAJAYA</td>
-                        <td style="text-align:center">2</td>
-                        <td style="text-align:right">986</td>
-                        <td style="text-align:right">819</td>
-                        <td><span class="util-pill high">83.1%</span></td>
-                        <td style="text-align:right">3,516</td>
-                        <td style="text-align:right">1,045</td>
-                        <td><span class="util-pill low">29.7%</span></td>
-                        <td style="text-align:right"><strong>4,502</strong></td>
-                        <td style="text-align:right"><strong>1,864</strong></td>
-                        <td><span class="util-pill low">41.4%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>KLANG VALLEY</strong></td>
-                        <td>P. SOUTH</td>
-                        <td style="text-align:center">2</td>
-                        <td style="text-align:right">384</td>
-                        <td style="text-align:right">321</td>
-                        <td><span class="util-pill high">83.6%</span></td>
-                        <td style="text-align:right">2,916</td>
-                        <td style="text-align:right">948</td>
-                        <td><span class="util-pill low">32.5%</span></td>
-                        <td style="text-align:right"><strong>3,300</strong></td>
-                        <td style="text-align:right"><strong>1,269</strong></td>
-                        <td><span class="util-pill low">38.5%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>KLANG VALLEY</strong></td>
-                        <td>MELAWATI</td>
-                        <td style="text-align:center">2</td>
-                        <td style="text-align:right">974</td>
-                        <td style="text-align:right">843</td>
-                        <td><span class="util-pill high">86.6%</span></td>
-                        <td style="text-align:right">2,868</td>
-                        <td style="text-align:right">487</td>
-                        <td><span class="util-pill low">17.0%</span></td>
-                        <td style="text-align:right"><strong>3,842</strong></td>
-                        <td style="text-align:right"><strong>1,330</strong></td>
-                        <td><span class="util-pill low">34.6%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>KLANG VALLEY</strong></td>
-                        <td>PJ MIDTOWN</td>
-                        <td style="text-align:center">1</td>
-                        <td style="text-align:right">104</td>
-                        <td style="text-align:right">75</td>
-                        <td><span class="util-pill medium">72.1%</span></td>
-                        <td style="text-align:right">3,228</td>
-                        <td style="text-align:right">1,046</td>
-                        <td><span class="util-pill low">32.4%</span></td>
-                        <td style="text-align:right"><strong>3,332</strong></td>
-                        <td style="text-align:right"><strong>1,121</strong></td>
-                        <td><span class="util-pill low">33.6%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>EAST MALAYSIA</strong></td>
-                        <td>TAWAU</td>
-                        <td style="text-align:center">1</td>
-                        <td style="text-align:right">449</td>
-                        <td style="text-align:right">264</td>
-                        <td><span class="util-pill medium">58.8%</span></td>
-                        <td style="text-align:right">1,920</td>
-                        <td style="text-align:right">455</td>
-                        <td><span class="util-pill low">23.7%</span></td>
-                        <td style="text-align:right"><strong>2,369</strong></td>
-                        <td style="text-align:right"><strong>719</strong></td>
-                        <td><span class="util-pill low">30.4%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>SOUTHERN</strong></td>
-                        <td>MUAR</td>
-                        <td style="text-align:center">2</td>
-                        <td style="text-align:right">1,068</td>
-                        <td style="text-align:right">481</td>
-                        <td><span class="util-pill low">45.0%</span></td>
-                        <td style="text-align:right">3,537</td>
-                        <td style="text-align:right">774</td>
-                        <td><span class="util-pill low">21.9%</span></td>
-                        <td style="text-align:right"><strong>4,605</strong></td>
-                        <td style="text-align:right"><strong>1,255</strong></td>
-                        <td><span class="util-pill low">27.3%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>EAST MALAYSIA</strong></td>
-                        <td>KUCHING</td>
-                        <td style="text-align:center">2</td>
-                        <td style="text-align:right">988</td>
-                        <td style="text-align:right">398</td>
-                        <td><span class="util-pill low">40.3%</span></td>
-                        <td style="text-align:right">3,468</td>
-                        <td style="text-align:right">522</td>
-                        <td><span class="util-pill low">15.1%</span></td>
-                        <td style="text-align:right"><strong>4,456</strong></td>
-                        <td style="text-align:right"><strong>920</strong></td>
-                        <td><span class="util-pill low">20.6%</span></td>
-                    </tr>
-
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Region Summary Table -->
-        <div class="section-header">
-            <h2><i class="fas fa-globe"></i> Regional Summary</h2>
-            <div class="section-line"></div>
-        </div>
-
-        <div class="table-card">
-            <h3><i class="fas fa-chart-bar"></i> Region Performance Overview</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Region</th>
-                        <th>Staff Count</th>
-                        <th>Open Mobile</th>
-                        <th>Used Mobile</th>
-                        <th>Mobile %</th>
-                        <th>Open Inhouse</th>
-                        <th>Used Inhouse</th>
-                        <th>Inhouse %</th>
-                        <th>Total Open</th>
-                        <th>Total Used</th>
-                        <th>Overall %</th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <tr>
-                        <td><strong>NORTHERN</strong></td>
-                        <td style="text-align:center">23</td>
-                        <td style="text-align:right">11,275</td>
-                        <td style="text-align:right">9,058</td>
-                        <td><span class="util-pill high">80.3%</span></td>
-                        <td style="text-align:right">26,030</td>
-                        <td style="text-align:right">20,740</td>
-                        <td><span class="util-pill medium">79.7%</span></td>
-                        <td style="text-align:right"><strong>37,305</strong></td>
-                        <td style="text-align:right"><strong>29,798</strong></td>
-                        <td><span class="util-pill medium">79.9%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>KLANG VALLEY</strong></td>
-                        <td style="text-align:center">55</td>
-                        <td style="text-align:right">27,475</td>
-                        <td style="text-align:right">23,171</td>
-                        <td><span class="util-pill high">84.3%</span></td>
-                        <td style="text-align:right">78,785</td>
-                        <td style="text-align:right">58,115</td>
-                        <td><span class="util-pill medium">73.8%</span></td>
-                        <td style="text-align:right"><strong>106,260</strong></td>
-                        <td style="text-align:right"><strong>81,286</strong></td>
-                        <td><span class="util-pill medium">76.5%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>SOUTHERN</strong></td>
-                        <td style="text-align:center">25</td>
-                        <td style="text-align:right">10,837</td>
-                        <td style="text-align:right">8,363</td>
-                        <td><span class="util-pill medium">77.2%</span></td>
-                        <td style="text-align:right">30,658</td>
-                        <td style="text-align:right">22,619</td>
-                        <td><span class="util-pill medium">73.8%</span></td>
-                        <td style="text-align:right"><strong>41,495</strong></td>
-                        <td style="text-align:right"><strong>30,982</strong></td>
-                        <td><span class="util-pill medium">74.7%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>EAST COAST</strong></td>
-                        <td style="text-align:center">8</td>
-                        <td style="text-align:right">4,374</td>
-                        <td style="text-align:right">3,565</td>
-                        <td><span class="util-pill high">81.5%</span></td>
-                        <td style="text-align:right">9,685</td>
-                        <td style="text-align:right">6,726</td>
-                        <td><span class="util-pill medium">69.4%</span></td>
-                        <td style="text-align:right"><strong>14,059</strong></td>
-                        <td style="text-align:right"><strong>10,291</strong></td>
-                        <td><span class="util-pill medium">73.2%</span></td>
-                    </tr>
-
-                    <tr>
-                        <td><strong>EAST MALAYSIA</strong></td>
-                        <td style="text-align:center">5</td>
-                        <td style="text-align:right">2,419</td>
-                        <td style="text-align:right">1,313</td>
-                        <td><span class="util-pill medium">54.3%</span></td>
-                        <td style="text-align:right">7,752</td>
-                        <td style="text-align:right">1,714</td>
-                        <td><span class="util-pill low">22.1%</span></td>
-                        <td style="text-align:right"><strong>10,171</strong></td>
-                        <td style="text-align:right"><strong>3,027</strong></td>
-                        <td><span class="util-pill low">29.8%</span></td>
-                    </tr>
-
-                </tbody>
-            </table>
-        </div>
-
-        <footer style="text-align: center; padding: 2rem; color: var(--text-light); font-size: 0.85rem;">
-            <p>Handover Inspection Productivity Dashboard 2025 &mdash; Generated on May 2026</p>
-            <p style="margin-top: 0.5rem;"><i class="fas fa-chart-line" style="color: var(--primary);"></i> Data-driven insights for operational excellence</p>
-        </footer>
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <h1>🏢 Handover Inspection Productivity <span>2025</span></h1>
+      <div class="header-meta">116 Staff · 33 Branches · 5 Regions · Jan – Dec 2025</div>
     </div>
+    <div class="controls">
+      <span class="ctrl-label">Filter Month:</span>
+      <select id="globalMonth" onchange="applyGlobalMonth()">
+        <option value="ALL">All Months</option>
+      </select>
+      <span class="ctrl-label">Region:</span>
+      <select id="globalRegion" onchange="applyFilters()">
+        <option value="ALL">All Regions</option>
+      </select>
+    </div>
+  </div>
+</div>
 
-    <script>
+<div class="main">
 
-        // Chart colors
-        const primaryColor = '#FF4C00';
-        const primaryLight = '#FF8A5C';
-        const primaryMid = '#FFB088';
-        const secondaryColor = '#FF6B35';
-        const accentColor = '#FFF0E8';
+  <!-- OVERVIEW KPIs -->
+  <div class="section-title mb-6">📊 Overall KPI Summary</div>
+  <div class="kpi-grid mb-6" id="kpiCards"></div>
 
-        const chartColors = [
-            '#FF4C00', '#FF6B35', '#FF8A5C', '#FFB088', '#FFD4C4',
-            '#E85D04', '#F48C06', '#FAA307', '#FFBA08', '#6C757D'
-        ];
+  <!-- TREND CHARTS -->
+  <div class="section-title mb-6">📈 Monthly Productivity Trend</div>
+  <div class="chart-grid chart-grid-3 mb-6">
+    <div class="chart-card">
+      <div class="chart-title">Open vs Used Slots — Monthly Trend <small id="trendLabel"></small></div>
+      <div class="chart-wrap" style="height:260px"><canvas id="trendChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Utilisation Rate by Month <small>%</small></div>
+      <div class="chart-wrap" style="height:260px"><canvas id="utilChart"></canvas></div>
+    </div>
+  </div>
 
-        // Monthly Trend Chart
-        const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-        new Chart(monthlyCtx, {
-            type: 'line',
-            data: {
-                labels: ["Jan 2025", "Feb 2025", "Mar 2025", "Apr 2025", "May 2025", "Jun 2025", "Jul 2025", "Aug 2025", "Sep 2025", "Oct 2025", "Nov 2025", "Dec 2025"],
-                datasets: [
-                    {
-                        label: 'Overall Utilization',
-                        data: [65.5, 66.3, 72.5, 69.2, 82.0, 79.1, 80.3, 84.0, 79.9, 66.6, 73.4, 73.7],
-                        borderColor: primaryColor,
-                        backgroundColor: 'rgba(255, 76, 0, 0.1)',
-                        borderWidth: 3,
-                        tension: 0.4,
-                        fill: true,
-                        pointBackgroundColor: primaryColor,
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        pointRadius: 5
-                    },
-                    {
-                        label: 'Mobile Utilization',
-                        data: [71.8, 70.4, 79.8, 75.0, 91.1, 81.2, 90.3, 87.2, 85.7, 72.1, 79.9, 78.8],
-                        borderColor: '#FF8A5C',
-                        backgroundColor: 'transparent',
-                        borderWidth: 2,
-                        borderDash: [5, 5],
-                        tension: 0.4,
-                        pointBackgroundColor: '#FF8A5C',
-                        pointRadius: 4
-                    },
-                    {
-                        label: 'Inhouse Utilization',
-                        data: [63.7, 65.1, 70.3, 67.5, 79.4, 78.4, 75.7, 82.4, 77.3, 64.5, 70.5, 71.5],
-                        borderColor: '#FFB088',
-                        backgroundColor: 'transparent',
-                        borderWidth: 2,
-                        borderDash: [2, 2],
-                        tension: 0.4,
-                        pointBackgroundColor: '#FFB088',
-                        pointRadius: 4
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false
-                },
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 15,
-                            font: { family: 'Inter', size: 12 }
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(26, 26, 46, 0.9)',
-                        titleFont: { family: 'Inter', size: 13 },
-                        bodyFont: { family: 'Inter', size: 12 },
-                        padding: 12,
-                        cornerRadius: 8,
-                        callbacks: {
-                            label: function(context) {
-                                return context.dataset.label + ': ' + context.parsed.y + '%';
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100,
-                        grid: { color: 'rgba(0,0,0,0.05)' },
-                        ticks: {
-                            callback: function(value) { return value + '%'; },
-                            font: { family: 'Inter' }
-                        }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { font: { family: 'Inter' } }
-                    }
-                }
-            }
-        });
+  <!-- REGION CHARTS -->
+  <div class="section-title mb-6">🌏 Regional Performance</div>
+  <div class="chart-grid chart-grid-2 mb-6">
+    <div class="chart-card">
+      <div class="chart-title">Open vs Used by Region <small id="regionBarLabel"></small></div>
+      <div class="chart-wrap" style="height:240px"><canvas id="regionBar"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Utilisation Rate by Region <small>%</small></div>
+      <div class="chart-wrap" style="height:240px"><canvas id="regionDoughnut"></canvas></div>
+    </div>
+  </div>
 
-        // Regional Comparison Chart
-        const regionCtx = document.getElementById('regionChart').getContext('2d');
-        new Chart(regionCtx, {
-            type: 'bar',
-            data: {
-                labels: ["NORTHERN", "KLANG VALLEY", "SOUTHERN", "EAST COAST", "EAST MALAYSIA"],
-                datasets: [
-                    {
-                        label: 'Overall Utilization %',
-                        data: [79.9, 76.5, 74.7, 73.2, 29.8],
-                        backgroundColor: chartColors.slice(0, 5),
-                        borderRadius: 8,
-                        borderSkipped: false
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: 'rgba(26, 26, 46, 0.9)',
-                        callbacks: {
-                            label: function(context) {
-                                return 'Utilization: ' + context.parsed.y + '%';
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100,
-                        grid: { color: 'rgba(0,0,0,0.05)' },
-                        ticks: {
-                            callback: function(value) { return value + '%'; }
-                        }
-                    },
-                    x: {
-                        grid: { display: false }
-                    }
-                }
-            }
-        });
+  <!-- BRANCH PRODUCTIVITY -->
+  <div class="section-title mb-6">🏬 Branch Productivity</div>
+  <div class="chart-card mb-6">
+    <div class="chart-title">Branch Open vs Used — Mobile & Inhouse <small id="branchChartLabel"></small></div>
+    <div class="filter-row">
+      <label>Branch Region:</label>
+      <select class="filter-select" id="branchRegionFilter" onchange="renderBranchChart()">
+        <option value="ALL">All Regions</option>
+      </select>
+      <label>Sort by:</label>
+      <select class="filter-select" id="branchSort" onchange="renderBranchChart()">
+        <option value="util_desc">Utilisation ↓</option>
+        <option value="util_asc">Utilisation ↑</option>
+        <option value="used_desc">Used Slots ↓</option>
+        <option value="alpha">A–Z</option>
+      </select>
+    </div>
+    <div class="chart-wrap" style="height:300px"><canvas id="branchBar"></canvas></div>
+  </div>
 
-        // Branch Productivity Chart (Horizontal Bar)
-        const branchCtx = document.getElementById('branchChart').getContext('2d');
-        new Chart(branchCtx, {
-            type: 'bar',
-            data: {
-                labels: ["PANTRANS", "JB ECO", "CHERAS", "P. JURU", "S. ALAM", "GLENMARIE", "IPOH", "SELAYANG", "P. MEDAN", "KUANTAN", "MELAKA", "SEREMBAN", "TMN MEGAH", "OKR", "A. SETAR"],
-                datasets: [
-                    {
-                        label: 'Open Mobile',
-                        data: [4, 4977, 2737, 2613, 4126, 3606, 2403, 3000, 2397, 2396, 2392, 1199, 2392, 2392, 1196],
-                        backgroundColor: '#FFD4C4',
-                        borderRadius: 4
-                    },
-                    {
-                        label: 'Used Mobile',
-                        data: [4, 4285, 2589, 2052, 3457, 3098, 2008, 2430, 2047, 1985, 1801, 893, 2001, 1979, 764],
-                        backgroundColor: '#FF8A5C',
-                        borderRadius: 4
-                    },
-                    {
-                        label: 'Open Inhouse',
-                        data: [23432, 14032, 7605, 7569, 4654, 3843, 4489, 3646, 4101, 3980, 3939, 5081, 3862, 3502, 4208],
-                        backgroundColor: '#E5E7EB',
-                        borderRadius: 4
-                    },
-                    {
-                        label: 'Used Inhouse',
-                        data: [21197, 12055, 7040, 6705, 3860, 3371, 4048, 2751, 3502, 3273, 3220, 4113, 3412, 2441, 3121],
-                        backgroundColor: '#FF4C00',
-                        borderRadius: 4
-                    }
-                ]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: { usePointStyle: true, padding: 10 }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(26, 26, 46, 0.9)',
-                        callbacks: {
-                            label: function(context) {
-                                return context.dataset.label + ': ' + context.parsed.x.toLocaleString();
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: { color: 'rgba(0,0,0,0.05)' },
-                        ticks: {
-                            callback: function(value) { return value >= 1000 ? (value/1000).toFixed(0) + 'k' : value; }
-                        }
-                    },
-                    y: {
-                        grid: { display: false }
-                    }
-                }
-            }
-        });
+  <!-- BRANCH TABLE -->
+  <div class="section-title mb-6">📋 Branch Breakdown Table</div>
+  <div class="chart-card mb-6">
+    <div class="filter-row">
+      <label>Region:</label>
+      <select class="filter-select" id="branchTableRegion" onchange="renderBranchTable()">
+        <option value="ALL">All Regions</option>
+      </select>
+      <label>Sort:</label>
+      <select class="filter-select" id="branchTableSort" onchange="renderBranchTable()">
+        <option value="util_desc">Util% ↓</option>
+        <option value="util_asc">Util% ↑</option>
+        <option value="used_desc">Used ↓</option>
+        <option value="alpha">A–Z</option>
+      </select>
+    </div>
+    <div class="table-wrap" id="branchTableWrap"></div>
+  </div>
 
-        // Distribution Pie Chart
-        const distCtx = document.getElementById('distributionChart').getContext('2d');
-        new Chart(distCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ["NORTHERN", "KLANG VALLEY", "SOUTHERN", "EAST COAST", "EAST MALAYSIA"],
-                datasets: [
-                    {
-                        data: [37305, 106260, 41495, 14059, 10171],
-                        backgroundColor: chartColors.slice(0, 5),
-                        borderWidth: 0,
-                        hoverOffset: 10
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '60%',
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 15,
-                            font: { family: 'Inter', size: 12 }
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(26, 26, 46, 0.9)',
-                        callbacks: {
-                            label: function(context) {
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const pct = ((context.parsed / total) * 100).toFixed(1);
-                                return context.label + ': ' + context.parsed.toLocaleString() + ' (' + pct + '%)';
-                            }
-                        }
-                    }
-                }
-            }
-        });
+  <!-- STAFF KPI CARDS -->
+  <div class="section-title mb-6">👤 Team Member KPI Cards</div>
+  <div class="chart-card mb-6">
+    <div class="filter-row">
+      <label>Region:</label>
+      <select class="filter-select" id="staffRegionFilter" onchange="populateStaffBranch();renderStaffCards()">
+        <option value="ALL">All Regions</option>
+      </select>
+      <label>Branch:</label>
+      <select class="filter-select" id="staffBranchFilter" onchange="renderStaffCards()">
+        <option value="ALL">All Branches</option>
+      </select>
+      <label>Sort by:</label>
+      <select class="filter-select" id="staffSort" onchange="renderStaffCards()">
+        <option value="util_desc">Util% ↓</option>
+        <option value="util_asc">Util% ↑</option>
+        <option value="used_desc">Used ↓</option>
+        <option value="alpha">A–Z</option>
+      </select>
+    </div>
+    <div class="staff-grid" id="staffGrid"></div>
+    <div class="pagination" id="staffPagination"></div>
+  </div>
 
-        // Staff filtering
-        function filterStaff(region) {
-            const cards = document.querySelectorAll('.staff-card');
-            const buttons = document.querySelectorAll('.filter-btn');
+  <!-- INSIGHTS -->
+  <div class="section-title mb-6">💡 Key Insights</div>
+  <div class="insights-grid mb-6" id="insightsGrid"></div>
 
-            buttons.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+</div>
 
-            cards.forEach(card => {
-                if (region === 'all' || card.dataset.region === region) {
-                    card.style.display = 'block';
-                    setTimeout(() => card.style.opacity = '1', 10);
-                } else {
-                    card.style.display = 'none';
-                    card.style.opacity = '0';
-                }
-            });
-        }
+<script>
+// ─────────────── DATA ───────────────
+const RAW = {"staff_summary":[{"STAFF NAME":"ABDUL MUBIN BIN HAPIDZ","REGION":"KLANG VALLEY","BRANCH":"OKR","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":2079,"USED_INHOUSE":1756},{"STAFF NAME":"ABDUL RAHIM BIN SABRUN","REGION":"KLANG VALLEY","BRANCH":"OKR","OPEN_MOBILE":1196,"USED_MOBILE":943,"OPEN_INHOUSE":7,"USED_INHOUSE":7},{"STAFF NAME":"ADIB WA'IE BIN MOHAMAD GHANI","REGION":"EAST COAST","BRANCH":"KUALA TERENGGANU","OPEN_MOBILE":372,"USED_MOBILE":307,"OPEN_INHOUSE":2130,"USED_INHOUSE":1154},{"STAFF NAME":"ADLI BIN AMIR","REGION":"KLANG VALLEY","BRANCH":"SETIA ALAM","OPEN_MOBILE":1210,"USED_MOBILE":1017,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"AFIQ MIRZA BIN ROMIDI","REGION":"KLANG VALLEY","BRANCH":"GLENMARIE","OPEN_MOBILE":1201,"USED_MOBILE":1025,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"AHMAD ALIFF HAKIM BIN SHAWAL","REGION":"EAST COAST","BRANCH":"KOTA BHARU","OPEN_MOBILE":906,"USED_MOBILE":865,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"AHMAD DHIYAUDDIN BIN ROSLAN","REGION":"KLANG VALLEY","BRANCH":"GLENMARIE","OPEN_MOBILE":1196,"USED_MOBILE":990,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"AHMAD SYAWAL FIKRI BIN AHMAD JAFRI","REGION":"KLANG VALLEY","BRANCH":"MELAWATI","OPEN_MOBILE":830,"USED_MOBILE":693,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"AHMAD THALHA BIN PISAL","REGION":"SOUTHERN","BRANCH":"SEREMBAN","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":3540,"USED_INHOUSE":2572},{"STAFF NAME":"AHMAD ZAKWAN BIN HISHAM","REGION":"KLANG VALLEY","BRANCH":"AMPANG","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":3540,"USED_INHOUSE":1185},{"STAFF NAME":"AIMAN SYAHIZZAD BIN KHAIRULL","REGION":"KLANG VALLEY","BRANCH":"SETIA ALAM","OPEN_MOBILE":1207,"USED_MOBILE":1038,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"AKMAL FITRI BIN AHMAD YUSNI","REGION":"SOUTHERN","BRANCH":"SEREMBAN","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":1533,"USED_INHOUSE":1533},{"STAFF NAME":"AMIRUL AIMAN BIN YAHYA","REGION":"KLANG VALLEY","BRANCH":"CHERAS","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":1461,"USED_INHOUSE":1461},{"STAFF NAME":"ARIF SUFI BIN MOHAMED","REGION":"EAST COAST","BRANCH":"KUALA TERENGGANU","OPEN_MOBILE":694,"USED_MOBILE":402,"OPEN_INHOUSE":35,"USED_INHOUSE":35},{"STAFF NAME":"AZLI ZULHELIMI BIN AZMI","REGION":"NORTHERN","BRANCH":"PENANG JURU","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":3540,"USED_INHOUSE":3135},{"STAFF NAME":"DANIAL FAKHRY BIN JANI","REGION":"SOUTHERN","BRANCH":"JB ECO","OPEN_MOBILE":1196,"USED_MOBILE":1014,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"DANISH ASLAM BIN ZAINUDDIN","REGION":"KLANG VALLEY","BRANCH":"PANTRANS","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":2361,"USED_INHOUSE":2055},{"STAFF NAME":"HASRULAZWAN BIN HASSAN","REGION":"SOUTHERN","BRANCH":"JB ECO","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":624,"USED_INHOUSE":507},{"STAFF NAME":"IRFAN FARHAN BIN IRWAN FAZLY","REGION":"KLANG VALLEY","BRANCH":"CHERAS","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":3540,"USED_INHOUSE":3214},{"STAFF NAME":"KELVIN KALANG ANAK GURA","REGION":"EAST MALAYSIA","BRANCH":"KUCHING","OPEN_MOBILE":16,"USED_MOBILE":16,"OPEN_INHOUSE":3468,"USED_INHOUSE":522},{"STAFF NAME":"KHAIRUL ABID BIN KHAIRI","REGION":"NORTHERN","BRANCH":"PENANG JURU","OPEN_MOBILE":1196,"USED_MOBILE":847,"OPEN_INHOUSE":8,"USED_INHOUSE":8},{"STAFF NAME":"KHOIRUL RIJAL BIN ABD HAMID KHAN","REGION":"KLANG VALLEY","BRANCH":"AMPANG","OPEN_MOBILE":1018,"USED_MOBILE":728,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"KU MUHAMMAD ADAM BIN KU MOHD ROZI","REGION":"NORTHERN","BRANCH":"ALOR SETAR","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":3540,"USED_INHOUSE":2453},{"STAFF NAME":"MARWAN BIN ABDULLAH","REGION":"NORTHERN","BRANCH":"PENANG JURU","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":481,"USED_INHOUSE":481},{"STAFF NAME":"MOHAMAD AFIQ IKWAN BIN NORIZAN","REGION":"KLANG VALLEY","BRANCH":"SETIA ALAM","OPEN_MOBILE":1196,"USED_MOBILE":988,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MOHAMAD AIMULLAH BIN MOHAMAD ZIN","REGION":"KLANG VALLEY","BRANCH":"PANTRANS","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":2690,"USED_INHOUSE":2413},{"STAFF NAME":"MOHAMAD AMIR ASYRAF BIN ABDUL HALIM","REGION":"EAST COAST","BRANCH":"KUANTAN","OPEN_MOBILE":1200,"USED_MOBILE":985,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MOHAMAD AMIRUL AZREEN BIN ROSLAN","REGION":"EAST COAST","BRANCH":"KUANTAN","OPEN_MOBILE":1196,"USED_MOBILE":1000,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MOHAMAD ASRAFF BIN MOHD FADZIR","REGION":"SOUTHERN","BRANCH":"JB ECO","OPEN_MOBILE":64,"USED_MOBILE":64,"OPEN_INHOUSE":3540,"USED_INHOUSE":3217},{"STAFF NAME":"MOHAMAD AZIZI BIN SALLEH","REGION":"SOUTHERN","BRANCH":"JB ECO","OPEN_MOBILE":54,"USED_MOBILE":54,"OPEN_INHOUSE":3540,"USED_INHOUSE":3038},{"STAFF NAME":"MOHAMAD HAFIZUDDIN BIN GHAZALI","REGION":"KLANG VALLEY","BRANCH":"GLENMARIE","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":3540,"USED_INHOUSE":3068},{"STAFF NAME":"MOHAMAD HAFIZULHILMY BIN MASERAN","REGION":"SOUTHERN","BRANCH":"JB ECO","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":624,"USED_INHOUSE":473},{"STAFF NAME":"MOHAMAD IKHWAN BIN ROSDI","REGION":"KLANG VALLEY","BRANCH":"PANTRANS","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":3698,"USED_INHOUSE":3475},{"STAFF NAME":"MOHAMAD NORMUZAMIL BIN AZLAN","REGION":"SOUTHERN","BRANCH":"JB ECO","OPEN_MOBILE":1206,"USED_MOBILE":1022,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MOHAMAD RAZIF BIN ABDUL RAHIM","REGION":"KLANG VALLEY","BRANCH":"SELAYANG","OPEN_MOBILE":607,"USED_MOBILE":549,"OPEN_INHOUSE":1668,"USED_INHOUSE":1216},{"STAFF NAME":"MOHAMAD RIDZUAN BIN ABDUL RAHMAN","REGION":"NORTHERN","BRANCH":"ALOR SETAR","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":668,"USED_INHOUSE":668},{"STAFF NAME":"MOHAMAD SHAHRUL HAIKAL BIN ANUAR","REGION":"KLANG VALLEY","BRANCH":"PJ MIDTOWN","OPEN_MOBILE":104,"USED_MOBILE":75,"OPEN_INHOUSE":3228,"USED_INHOUSE":1046},{"STAFF NAME":"MOHAMAD SUFI BIN MOHD SABARI","REGION":"NORTHERN","BRANCH":"PENANG JURU","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":3540,"USED_INHOUSE":3081},{"STAFF NAME":"MOHAMAD SYAHMI BIN REBU","REGION":"NORTHERN","BRANCH":"IPOH","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":3540,"USED_INHOUSE":3099},{"STAFF NAME":"MOHAMMAD AMIRUL HAQIM BIN BAKRI","REGION":"KLANG VALLEY","BRANCH":"OKR","OPEN_MOBILE":1196,"USED_MOBILE":1036,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MOHAMMAD FAIZ BIN IZHAR","REGION":"KLANG VALLEY","BRANCH":"PANTRANS","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":2356,"USED_INHOUSE":1528},{"STAFF NAME":"MOHAMMAD HANIS BIN DAYA ROBI","REGION":"NORTHERN","BRANCH":"IPOH","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":943,"USED_INHOUSE":943},{"STAFF NAME":"MOHAMMAD MAZZUAN HAQIMI BIN ZAMRI","REGION":"SOUTHERN","BRANCH":"SEREMBAN","OPEN_MOBILE":1199,"USED_MOBILE":893,"OPEN_INHOUSE":8,"USED_INHOUSE":8},{"STAFF NAME":"MOHAMMAD SHAFIQ BIN JASNI","REGION":"NORTHERN","BRANCH":"PENANG MEDAN","OPEN_MOBILE":2,"USED_MOBILE":2,"OPEN_INHOUSE":558,"USED_INHOUSE":558},{"STAFF NAME":"MOHAMMAD SYAWAL BIN ABDUL RAZAK","REGION":"SOUTHERN","BRANCH":"JB ECO","OPEN_MOBILE":1196,"USED_MOBILE":1033,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MOHD ALIFF ISKANDAR BIN ABDUL NASSER","REGION":"NORTHERN","BRANCH":"PENANG JURU","OPEN_MOBILE":1209,"USED_MOBILE":1045,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MOHD FIRDAUS YAKUP","REGION":"EAST MALAYSIA","BRANCH":"KUCHING","OPEN_MOBILE":972,"USED_MOBILE":382,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MOHD HANIF BIN JAMALUDIN","REGION":"NORTHERN","BRANCH":"PENANG BAYAN","OPEN_MOBILE":245,"USED_MOBILE":148,"OPEN_INHOUSE":22,"USED_INHOUSE":22},{"STAFF NAME":"MOHD HANIF BIN MOHD YAZID","REGION":"SOUTHERN","BRANCH":"MUAR","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":3516,"USED_INHOUSE":753},{"STAFF NAME":"MOHD IZZAT BIN GHAZALI","REGION":"KLANG VALLEY","BRANCH":"SETIA ALAM","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":2050,"USED_INHOUSE":1584},{"STAFF NAME":"MOHD SHAHRUL IZAM BIN MOHD JALI","REGION":"KLANG VALLEY","BRANCH":"KAJANG","OPEN_MOBILE":1208,"USED_MOBILE":1033,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MOHD SYAFIQ BIN MOHD FAISAL","REGION":"NORTHERN","BRANCH":"PENANG BAYAN","OPEN_MOBILE":19,"USED_MOBILE":15,"OPEN_INHOUSE":1993,"USED_INHOUSE":1315},{"STAFF NAME":"MOHD SYAFIQ IKHWAN BIN RUZEMAN","REGION":"EAST COAST","BRANCH":"KUANTAN","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":440,"USED_INHOUSE":440},{"STAFF NAME":"MOHD ZULKIFLI BIN ABDULLAH","REGION":"SOUTHERN","BRANCH":"BATU PAHAT","OPEN_MOBILE":2,"USED_MOBILE":2,"OPEN_INHOUSE":516,"USED_INHOUSE":516},{"STAFF NAME":"MUHAMAD AISAR BIN MOHD NIZAM","REGION":"NORTHERN","BRANCH":"PENANG MEDAN","OPEN_MOBILE":1196,"USED_MOBILE":1017,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MUHAMAD AMIRUL ADLI BIN MOHD HAKAM","REGION":"KLANG VALLEY","BRANCH":"CHERAS","OPEN_MOBILE":305,"USED_MOBILE":282,"OPEN_INHOUSE":2604,"USED_INHOUSE":2365},{"STAFF NAME":"MUHAMAD FAZLI BIN AB HAMID","REGION":"SOUTHERN","BRANCH":"JB ECO","OPEN_MOBILE":208,"USED_MOBILE":158,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MUHAMAD FIRDHAUS BIN MOKHTAR","REGION":"KLANG VALLEY","BRANCH":"PANTRANS","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":1446,"USED_INHOUSE":1422},{"STAFF NAME":"MUHAMAD IKRAM BIN NURUN AZMAN","REGION":"KLANG VALLEY","BRANCH":"TAMAN MEGAH","OPEN_MOBILE":1196,"USED_MOBILE":977,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MUHAMMAD AFIQ HAKIMI BIN ABDUL RAHIM","REGION":"KLANG VALLEY","BRANCH":"PANTRANS","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":3637,"USED_INHOUSE":3536},{"STAFF NAME":"MUHAMMAD AIZAT HELMY BIN ABU HASSAN","REGION":"KLANG VALLEY","BRANCH":"PUCHONG","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":3540,"USED_INHOUSE":2706},{"STAFF NAME":"MUHAMMAD ALIF BIN MAT SHAFAR","REGION":"KLANG VALLEY","BRANCH":"CHERAS","OPEN_MOBILE":1216,"USED_MOBILE":1150,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MUHAMMAD ALIFF ISKANDAR BIN MOHAMED HATAL","REGION":"NORTHERN","BRANCH":"IPOH","OPEN_MOBILE":1207,"USED_MOBILE":1026,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MUHAMMAD AMIRUL ARIF BIN AZMAN","REGION":"KLANG VALLEY","BRANCH":"KAJANG","OPEN_MOBILE":614,"USED_MOBILE":555,"OPEN_INHOUSE":1668,"USED_INHOUSE":1571},{"STAFF NAME":"MUHAMMAD AMMAR BIN BAHRI","REGION":"NORTHERN","BRANCH":"SUNGAI PETANI","OPEN_MOBILE":1062,"USED_MOBILE":774,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MUHAMMAD AMMAR RAFIQ BIN ISMAIL","REGION":"NORTHERN","BRANCH":"IPOH","OPEN_MOBILE":1196,"USED_MOBILE":982,"OPEN_INHOUSE":6,"USED_INHOUSE":6},{"STAFF NAME":"MUHAMMAD AMMIL RAIF BIN NORAZMI","REGION":"KLANG VALLEY","BRANCH":"SETIA ALAM","OPEN_MOBILE":305,"USED_MOBILE":282,"OPEN_INHOUSE":2604,"USED_INHOUSE":2276},{"STAFF NAME":"MUHAMMAD ANIQ HAZMAN BIN ROSLI","REGION":"KLANG VALLEY","BRANCH":"TAMAN MEGAH","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":3540,"USED_INHOUSE":3090},{"STAFF NAME":"MUHAMMAD ANNAS BIN MOHD YUSOFF","REGION":"NORTHERN","BRANCH":"ALOR SETAR","OPEN_MOBILE":1196,"USED_MOBILE":764,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MUHAMMAD ARIFFIN BIN MUHAMMAD SIDDIQ RAVISHANKER","REGION":"KLANG VALLEY","BRANCH":"SETAPAK","OPEN_MOBILE":567,"USED_MOBILE":430,"OPEN_INHOUSE":1668,"USED_INHOUSE":564},{"STAFF NAME":"MUHAMMAD AZLI BIN MAT SHAFAR","REGION":"KLANG VALLEY","BRANCH":"PUCHONG","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":536,"USED_INHOUSE":536},{"STAFF NAME":"MUHAMMAD DANIAL BIN HALIM","REGION":"KLANG VALLEY","BRANCH":"GLENMARIE","OPEN_MOBILE":1209,"USED_MOBILE":1083,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MUHAMMAD FADHILAH BIN BAHARIN","REGION":"SOUTHERN","BRANCH":"MELAKA","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":3540,"USED_INHOUSE":2821},{"STAFF NAME":"MUHAMMAD FARHAN BIN USRI","REGION":"SOUTHERN","BRANCH":"JB ECO","OPEN_MOBILE":61,"USED_MOBILE":61,"OPEN_INHOUSE":3540,"USED_INHOUSE":3060},{"STAFF NAME":"MUHAMMAD FARID BIN MOHAMMAD JOHARI","REGION":"KLANG VALLEY","BRANCH":"PUTRAJAYA","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":3516,"USED_INHOUSE":1045},{"STAFF NAME":"MUHAMMAD FAZRUL BIN HASNI","REGION":"EAST COAST","BRANCH":"KUANTAN","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":3540,"USED_INHOUSE":2833},{"STAFF NAME":"MUHAMMAD FIRDAUS BIN MASELAN","REGION":"NORTHERN","BRANCH":"PENANG BAYAN","OPEN_MOBILE":528,"USED_MOBILE":482,"OPEN_INHOUSE":1668,"USED_INHOUSE":1086},{"STAFF NAME":"MUHAMMAD FIRDAUS BIN NORIZAL","REGION":"KLANG VALLEY","BRANCH":"PUTRAJAYA","OPEN_MOBILE":986,"USED_MOBILE":819,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MUHAMMAD HAMIRUL HAKIM","REGION":"KLANG VALLEY","BRANCH":"SELAYANG","OPEN_MOBILE":1197,"USED_MOBILE":932,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MUHAMMAD HANIF BIN NOR ABIDIN","REGION":"KLANG VALLEY","BRANCH":"TAMAN MEGAH","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":322,"USED_INHOUSE":322},{"STAFF NAME":"MUHAMMAD HANIF HIZWAN BIN MD HALID","REGION":"SOUTHERN","BRANCH":"JB ECO","OPEN_MOBILE":4,"USED_MOBILE":4,"OPEN_INHOUSE":1980,"USED_INHOUSE":1576},{"STAFF NAME":"MUHAMMAD HAZIQ BIN KHAIRI","REGION":"KLANG VALLEY","BRANCH":"SETAPAK","OPEN_MOBILE":632,"USED_MOBILE":472,"OPEN_INHOUSE":1216,"USED_INHOUSE":1116},{"STAFF NAME":"MUHAMMAD IKHMAL BIN MOHD RAZI","REGION":"KLANG VALLEY","BRANCH":"SELAYANG","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":1978,"USED_INHOUSE":1535},{"STAFF NAME":"MUHAMMAD IKHMAL HAKIM BIN M.HIDUWAN","REGION":"KLANG VALLEY","BRANCH":"SUNGAI BULOH","OPEN_MOBILE":532,"USED_MOBILE":534,"OPEN_INHOUSE":1668,"USED_INHOUSE":962},{"STAFF NAME":"MUHAMMAD IKHWAN BIN MOHAMAD NORDIN","REGION":"NORTHERN","BRANCH":"PENANG BAYAN","OPEN_MOBILE":396,"USED_MOBILE":385,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MUHAMMAD IMRAN SYAKIR BIN LUKMAN","REGION":"SOUTHERN","BRANCH":"MELAKA","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":379,"USED_INHOUSE":379},{"STAFF NAME":"MUHAMMAD IRFAN HAZWAN BIN HALIM","REGION":"NORTHERN","BRANCH":"PENANG MEDAN","OPEN_MOBILE":1199,"USED_MOBILE":1028,"OPEN_INHOUSE":3,"USED_INHOUSE":3},{"STAFF NAME":"MUHAMMAD ISLAN BIN TIBLANI","REGION":"EAST MALAYSIA","BRANCH":"KOTA KINABALU","OPEN_MOBILE":262,"USED_MOBILE":222,"OPEN_INHOUSE":2364,"USED_INHOUSE":737},{"STAFF NAME":"MUHAMMAD ISMA SYUKRAN BIN AZMAN","REGION":"KLANG VALLEY","BRANCH":"SETIA ALAM","OPEN_MOBILE":208,"USED_MOBILE":132,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MUHAMMAD MUHAIMIN BIN SHAIFUL ZAM ZAM","REGION":"SOUTHERN","BRANCH":"MELAKA","OPEN_MOBILE":1196,"USED_MOBILE":889,"OPEN_INHOUSE":7,"USED_INHOUSE":7},{"STAFF NAME":"MUHAMMAD NABIL MUBASYIR BIN MOHD ZAMRI","REGION":"KLANG VALLEY","BRANCH":"SELAYANG","OPEN_MOBILE":1196,"USED_MOBILE":949,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MUHAMMAD NAJMI BIN MOHD ZAKI","REGION":"NORTHERN","BRANCH":"PENANG JURU","OPEN_MOBILE":208,"USED_MOBILE":160,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MUHAMMAD NUR AIMAN BIN MOHD NURFENDI","REGION":"KLANG VALLEY","BRANCH":"TAMAN MEGAH","OPEN_MOBILE":1196,"USED_MOBILE":1024,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MUHAMMAD NUR HADI BIN ZAINI","REGION":"SOUTHERN","BRANCH":"JB ECO","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":184,"USED_INHOUSE":184},{"STAFF NAME":"MUHAMMAD NURKAMALUDDIN BIN MOHD AHIRWA","REGION":"SOUTHERN","BRANCH":"BATU PAHAT","OPEN_MOBILE":1199,"USED_MOBILE":901,"OPEN_INHOUSE":13,"USED_INHOUSE":13},{"STAFF NAME":"MUHAMMAD RAFIDI BIN RAMLI","REGION":"KLANG VALLEY","BRANCH":"KAJANG","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":1877,"USED_INHOUSE":1877},{"STAFF NAME":"MUHAMMAD RUSYDI BIN AZMAN","REGION":"SOUTHERN","BRANCH":"MUAR","OPEN_MOBILE":1068,"USED_MOBILE":481,"OPEN_INHOUSE":21,"USED_INHOUSE":21},{"STAFF NAME":"MUHAMMAD SAUQI BIN JAMALUDIN","REGION":"SOUTHERN","BRANCH":"BATU PAHAT","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":3540,"USED_INHOUSE":1928},{"STAFF NAME":"MUHAMMAD SHAHID BIN SUHAI","REGION":"SOUTHERN","BRANCH":"MELAKA","OPEN_MOBILE":1196,"USED_MOBILE":912,"OPEN_INHOUSE":13,"USED_INHOUSE":13},{"STAFF NAME":"MUHAMMAD SHAZWAN SHAFIQ BIN MOHD YUSNI","REGION":"KLANG VALLEY","BRANCH":"OKR","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":1416,"USED_INHOUSE":678},{"STAFF NAME":"MUHAMMAD SYAHIRAN BIN SUEILAN","REGION":"KLANG VALLEY","BRANCH":"PUCHONG","OPEN_MOBILE":1203,"USED_MOBILE":1020,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MUHAMMAD THAZMI BIN ABDUL RAHMAN","REGION":"SOUTHERN","BRANCH":"JB ECO","OPEN_MOBILE":780,"USED_MOBILE":695,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"MUHAMMAD ZAFRAN BIN ZAMRI","REGION":"NORTHERN","BRANCH":"SUNGAI PETANI","OPEN_MOBILE":416,"USED_MOBILE":383,"OPEN_INHOUSE":1980,"USED_INHOUSE":941},{"STAFF NAME":"MUHAMMAD ZULHELMAN BIN MOHD OKHIR","REGION":"KLANG VALLEY","BRANCH":"PANTRANS","OPEN_MOBILE":3,"USED_MOBILE":3,"OPEN_INHOUSE":3625,"USED_INHOUSE":3509},{"STAFF NAME":"MUHAMMAD ZUQNI BIN MAHMUD","REGION":"KLANG VALLEY","BRANCH":"PUCHONG SOUTH","OPEN_MOBILE":176,"USED_MOBILE":163,"OPEN_INHOUSE":2916,"USED_INHOUSE":948},{"STAFF NAME":"MUHD HAFIZUDDIN BIN LATIF","REGION":"KLANG VALLEY","BRANCH":"MELAWATI","OPEN_MOBILE":144,"USED_MOBILE":150,"OPEN_INHOUSE":2868,"USED_INHOUSE":487},{"STAFF NAME":"NOOR RAHIM BIN MOHD ARIS","REGION":"SOUTHERN","BRANCH":"JB ECO","OPEN_MOBILE":208,"USED_MOBILE":180,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"OSMAN BIN ISHAK","REGION":"KLANG VALLEY","BRANCH":"GLENMARIE","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":303,"USED_INHOUSE":303},{"STAFF NAME":"PUTRA AMIR HUSSIN BIN ANUAR","REGION":"KLANG VALLEY","BRANCH":"PANTRANS","OPEN_MOBILE":1,"USED_MOBILE":1,"OPEN_INHOUSE":3619,"USED_INHOUSE":3259},{"STAFF NAME":"QUSYAIRY DANIEL BIN YUSDY","REGION":"EAST COAST","BRANCH":"KOTA BHARU","OPEN_MOBILE":6,"USED_MOBILE":6,"OPEN_INHOUSE":3540,"USED_INHOUSE":2264},{"STAFF NAME":"RAKIN BIN MOHD RUZI","REGION":"NORTHERN","BRANCH":"PENANG MEDAN","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":3540,"USED_INHOUSE":2941},{"STAFF NAME":"RIDUAN BIN RAIMING","REGION":"EAST MALAYSIA","BRANCH":"TAWAU","OPEN_MOBILE":449,"USED_MOBILE":264,"OPEN_INHOUSE":1920,"USED_INHOUSE":455},{"STAFF NAME":"RONALD MAJIN","REGION":"EAST MALAYSIA","BRANCH":"KOTA KINABALU","OPEN_MOBILE":720,"USED_MOBILE":429,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"SHARWIN PILLAI A/L KALAICHELVAN","REGION":"KLANG VALLEY","BRANCH":"SUNGAI BULOH","OPEN_MOBILE":996,"USED_MOBILE":783,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"SHUKHAIZI BIN MISBAH","REGION":"KLANG VALLEY","BRANCH":"PUCHONG SOUTH","OPEN_MOBILE":208,"USED_MOBILE":158,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"STAFF NAME":"SYED HATIM HAKIMY BIN SYED MOHAMAD YUSOFF KHYDIR","REGION":"KLANG VALLEY","BRANCH":"CHERAS","OPEN_MOBILE":1216,"USED_MOBILE":1157,"OPEN_INHOUSE":0,"USED_INHOUSE":0}],"branch_monthly":[{"BRANCH":"ALOR SETAR","REGION":"NORTHERN","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":96,"USED_MOBILE":38,"OPEN_INHOUSE":351,"USED_INHOUSE":248},{"BRANCH":"ALOR SETAR","REGION":"NORTHERN","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":96,"USED_MOBILE":41,"OPEN_INHOUSE":337,"USED_INHOUSE":218},{"BRANCH":"ALOR SETAR","REGION":"NORTHERN","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":96,"USED_MOBILE":49,"OPEN_INHOUSE":342,"USED_INHOUSE":187},{"BRANCH":"ALOR SETAR","REGION":"NORTHERN","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":100,"USED_MOBILE":51,"OPEN_INHOUSE":363,"USED_INHOUSE":190},{"BRANCH":"ALOR SETAR","REGION":"NORTHERN","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":84,"USED_MOBILE":69,"OPEN_INHOUSE":397,"USED_INHOUSE":361},{"BRANCH":"ALOR SETAR","REGION":"NORTHERN","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":100,"USED_MOBILE":79,"OPEN_INHOUSE":256,"USED_INHOUSE":188},{"BRANCH":"ALOR SETAR","REGION":"NORTHERN","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":104,"USED_MOBILE":98,"OPEN_INHOUSE":335,"USED_INHOUSE":301},{"BRANCH":"ALOR SETAR","REGION":"NORTHERN","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":104,"USED_MOBILE":77,"OPEN_INHOUSE":352,"USED_INHOUSE":288},{"BRANCH":"ALOR SETAR","REGION":"NORTHERN","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":104,"USED_MOBILE":74,"OPEN_INHOUSE":349,"USED_INHOUSE":282},{"BRANCH":"ALOR SETAR","REGION":"NORTHERN","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":104,"USED_MOBILE":38,"OPEN_INHOUSE":375,"USED_INHOUSE":248},{"BRANCH":"ALOR SETAR","REGION":"NORTHERN","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":104,"USED_MOBILE":76,"OPEN_INHOUSE":374,"USED_INHOUSE":302},{"BRANCH":"ALOR SETAR","REGION":"NORTHERN","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":104,"USED_MOBILE":74,"OPEN_INHOUSE":377,"USED_INHOUSE":308},{"BRANCH":"AMPANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":64,"USED_MOBILE":57,"OPEN_INHOUSE":288,"USED_INHOUSE":31},{"BRANCH":"AMPANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":68,"USED_MOBILE":48,"OPEN_INHOUSE":288,"USED_INHOUSE":32},{"BRANCH":"AMPANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":64,"USED_MOBILE":47,"OPEN_INHOUSE":288,"USED_INHOUSE":61},{"BRANCH":"AMPANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":68,"USED_MOBILE":43,"OPEN_INHOUSE":300,"USED_INHOUSE":41},{"BRANCH":"AMPANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":74,"USED_MOBILE":70,"OPEN_INHOUSE":252,"USED_INHOUSE":65},{"BRANCH":"AMPANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":68,"USED_MOBILE":72,"OPEN_INHOUSE":252,"USED_INHOUSE":136},{"BRANCH":"AMPANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":100,"USED_MOBILE":94,"OPEN_INHOUSE":312,"USED_INHOUSE":154},{"BRANCH":"AMPANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":96,"USED_MOBILE":90,"OPEN_INHOUSE":312,"USED_INHOUSE":141},{"BRANCH":"AMPANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":104,"USED_MOBILE":82,"OPEN_INHOUSE":312,"USED_INHOUSE":131},{"BRANCH":"AMPANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":104,"USED_MOBILE":57,"OPEN_INHOUSE":312,"USED_INHOUSE":144},{"BRANCH":"AMPANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":104,"USED_MOBILE":35,"OPEN_INHOUSE":312,"USED_INHOUSE":123},{"BRANCH":"AMPANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":104,"USED_MOBILE":33,"OPEN_INHOUSE":312,"USED_INHOUSE":126},{"BRANCH":"BATU PAHAT","REGION":"SOUTHERN","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":96,"USED_MOBILE":59,"OPEN_INHOUSE":334,"USED_INHOUSE":165},{"BRANCH":"BATU PAHAT","REGION":"SOUTHERN","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":96,"USED_MOBILE":64,"OPEN_INHOUSE":359,"USED_INHOUSE":215},{"BRANCH":"BATU PAHAT","REGION":"SOUTHERN","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":96,"USED_MOBILE":70,"OPEN_INHOUSE":357,"USED_INHOUSE":194},{"BRANCH":"BATU PAHAT","REGION":"SOUTHERN","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":100,"USED_MOBILE":60,"OPEN_INHOUSE":350,"USED_INHOUSE":178},{"BRANCH":"BATU PAHAT","REGION":"SOUTHERN","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":87,"USED_MOBILE":87,"OPEN_INHOUSE":319,"USED_INHOUSE":245},{"BRANCH":"BATU PAHAT","REGION":"SOUTHERN","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":100,"USED_MOBILE":85,"OPEN_INHOUSE":295,"USED_INHOUSE":145},{"BRANCH":"BATU PAHAT","REGION":"SOUTHERN","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":106,"USED_MOBILE":90,"OPEN_INHOUSE":347,"USED_INHOUSE":302},{"BRANCH":"BATU PAHAT","REGION":"SOUTHERN","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":104,"USED_MOBILE":85,"OPEN_INHOUSE":362,"USED_INHOUSE":303},{"BRANCH":"BATU PAHAT","REGION":"SOUTHERN","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":104,"USED_MOBILE":82,"OPEN_INHOUSE":359,"USED_INHOUSE":297},{"BRANCH":"BATU PAHAT","REGION":"SOUTHERN","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":104,"USED_MOBILE":59,"OPEN_INHOUSE":358,"USED_INHOUSE":165},{"BRANCH":"BATU PAHAT","REGION":"SOUTHERN","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":104,"USED_MOBILE":82,"OPEN_INHOUSE":313,"USED_INHOUSE":121},{"BRANCH":"BATU PAHAT","REGION":"SOUTHERN","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":104,"USED_MOBILE":80,"OPEN_INHOUSE":316,"USED_INHOUSE":127},{"BRANCH":"CHERAS","REGION":"KLANG VALLEY","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":192,"USED_MOBILE":184,"OPEN_INHOUSE":617,"USED_INHOUSE":404},{"BRANCH":"CHERAS","REGION":"KLANG VALLEY","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":192,"USED_MOBILE":168,"OPEN_INHOUSE":604,"USED_INHOUSE":598},{"BRANCH":"CHERAS","REGION":"KLANG VALLEY","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":196,"USED_MOBILE":198,"OPEN_INHOUSE":605,"USED_INHOUSE":609},{"BRANCH":"CHERAS","REGION":"KLANG VALLEY","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":200,"USED_MOBILE":190,"OPEN_INHOUSE":632,"USED_INHOUSE":586},{"BRANCH":"CHERAS","REGION":"KLANG VALLEY","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":204,"USED_MOBILE":204,"OPEN_INHOUSE":519,"USED_INHOUSE":515},{"BRANCH":"CHERAS","REGION":"KLANG VALLEY","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":200,"USED_MOBILE":208,"OPEN_INHOUSE":560,"USED_INHOUSE":543},{"BRANCH":"CHERAS","REGION":"KLANG VALLEY","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":305,"USED_MOBILE":290,"OPEN_INHOUSE":609,"USED_INHOUSE":598},{"BRANCH":"CHERAS","REGION":"KLANG VALLEY","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":312,"USED_MOBILE":288,"OPEN_INHOUSE":610,"USED_INHOUSE":593},{"BRANCH":"CHERAS","REGION":"KLANG VALLEY","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":312,"USED_MOBILE":279,"OPEN_INHOUSE":607,"USED_INHOUSE":587},{"BRANCH":"CHERAS","REGION":"KLANG VALLEY","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":208,"USED_MOBILE":184,"OPEN_INHOUSE":665,"USED_INHOUSE":604},{"BRANCH":"CHERAS","REGION":"KLANG VALLEY","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":208,"USED_MOBILE":200,"OPEN_INHOUSE":787,"USED_INHOUSE":697},{"BRANCH":"CHERAS","REGION":"KLANG VALLEY","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":208,"USED_MOBILE":196,"OPEN_INHOUSE":790,"USED_INHOUSE":706},{"BRANCH":"GLENMARIE","REGION":"KLANG VALLEY","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":288,"USED_MOBILE":227,"OPEN_INHOUSE":307,"USED_INHOUSE":301},{"BRANCH":"GLENMARIE","REGION":"KLANG VALLEY","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":288,"USED_MOBILE":250,"OPEN_INHOUSE":306,"USED_INHOUSE":276},{"BRANCH":"GLENMARIE","REGION":"KLANG VALLEY","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":288,"USED_MOBILE":241,"OPEN_INHOUSE":305,"USED_INHOUSE":242},{"BRANCH":"GLENMARIE","REGION":"KLANG VALLEY","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":300,"USED_MOBILE":240,"OPEN_INHOUSE":313,"USED_INHOUSE":208},{"BRANCH":"GLENMARIE","REGION":"KLANG VALLEY","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":270,"USED_MOBILE":262,"OPEN_INHOUSE":263,"USED_INHOUSE":245},{"BRANCH":"GLENMARIE","REGION":"KLANG VALLEY","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":300,"USED_MOBILE":260,"OPEN_INHOUSE":283,"USED_INHOUSE":264},{"BRANCH":"GLENMARIE","REGION":"KLANG VALLEY","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":312,"USED_MOBILE":292,"OPEN_INHOUSE":368,"USED_INHOUSE":315},{"BRANCH":"GLENMARIE","REGION":"KLANG VALLEY","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":312,"USED_MOBILE":288,"OPEN_INHOUSE":373,"USED_INHOUSE":360},{"BRANCH":"GLENMARIE","REGION":"KLANG VALLEY","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":312,"USED_MOBILE":279,"OPEN_INHOUSE":370,"USED_INHOUSE":354},{"BRANCH":"GLENMARIE","REGION":"KLANG VALLEY","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":312,"USED_MOBILE":227,"OPEN_INHOUSE":331,"USED_INHOUSE":301},{"BRANCH":"GLENMARIE","REGION":"KLANG VALLEY","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":312,"USED_MOBILE":269,"OPEN_INHOUSE":312,"USED_INHOUSE":251},{"BRANCH":"GLENMARIE","REGION":"KLANG VALLEY","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":312,"USED_MOBILE":263,"OPEN_INHOUSE":312,"USED_INHOUSE":254},{"BRANCH":"IPOH","REGION":"NORTHERN","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":192,"USED_MOBILE":158,"OPEN_INHOUSE":416,"USED_INHOUSE":345},{"BRANCH":"IPOH","REGION":"NORTHERN","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":192,"USED_MOBILE":136,"OPEN_INHOUSE":321,"USED_INHOUSE":295},{"BRANCH":"IPOH","REGION":"NORTHERN","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":192,"USED_MOBILE":161,"OPEN_INHOUSE":377,"USED_INHOUSE":369},{"BRANCH":"IPOH","REGION":"NORTHERN","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":200,"USED_MOBILE":159,"OPEN_INHOUSE":391,"USED_INHOUSE":361},{"BRANCH":"IPOH","REGION":"NORTHERN","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":179,"USED_MOBILE":175,"OPEN_INHOUSE":343,"USED_INHOUSE":326},{"BRANCH":"IPOH","REGION":"NORTHERN","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":200,"USED_MOBILE":166,"OPEN_INHOUSE":262,"USED_INHOUSE":254},{"BRANCH":"IPOH","REGION":"NORTHERN","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":208,"USED_MOBILE":191,"OPEN_INHOUSE":355,"USED_INHOUSE":325},{"BRANCH":"IPOH","REGION":"NORTHERN","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":208,"USED_MOBILE":176,"OPEN_INHOUSE":358,"USED_INHOUSE":315},{"BRANCH":"IPOH","REGION":"NORTHERN","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":208,"USED_MOBILE":170,"OPEN_INHOUSE":355,"USED_INHOUSE":309},{"BRANCH":"IPOH","REGION":"NORTHERN","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":208,"USED_MOBILE":158,"OPEN_INHOUSE":440,"USED_INHOUSE":345},{"BRANCH":"IPOH","REGION":"NORTHERN","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":208,"USED_MOBILE":181,"OPEN_INHOUSE":434,"USED_INHOUSE":399},{"BRANCH":"IPOH","REGION":"NORTHERN","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":208,"USED_MOBILE":177,"OPEN_INHOUSE":437,"USED_INHOUSE":405},{"BRANCH":"JB ECO","REGION":"SOUTHERN","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":288,"USED_MOBILE":234,"OPEN_INHOUSE":1188,"USED_INHOUSE":904},{"BRANCH":"JB ECO","REGION":"SOUTHERN","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":288,"USED_MOBILE":246,"OPEN_INHOUSE":1173,"USED_INHOUSE":912},{"BRANCH":"JB ECO","REGION":"SOUTHERN","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":288,"USED_MOBILE":199,"OPEN_INHOUSE":1167,"USED_INHOUSE":1058},{"BRANCH":"JB ECO","REGION":"SOUTHERN","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":332,"USED_MOBILE":283,"OPEN_INHOUSE":1222,"USED_INHOUSE":1120},{"BRANCH":"JB ECO","REGION":"SOUTHERN","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":326,"USED_MOBILE":315,"OPEN_INHOUSE":1023,"USED_INHOUSE":1004},{"BRANCH":"JB ECO","REGION":"SOUTHERN","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":360,"USED_MOBILE":278,"OPEN_INHOUSE":1083,"USED_INHOUSE":1041},{"BRANCH":"JB ECO","REGION":"SOUTHERN","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":599,"USED_MOBILE":569,"OPEN_INHOUSE":1248,"USED_INHOUSE":804},{"BRANCH":"JB ECO","REGION":"SOUTHERN","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":416,"USED_MOBILE":371,"OPEN_INHOUSE":936,"USED_INHOUSE":873},{"BRANCH":"JB ECO","REGION":"SOUTHERN","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":416,"USED_MOBILE":359,"OPEN_INHOUSE":936,"USED_INHOUSE":864},{"BRANCH":"JB ECO","REGION":"SOUTHERN","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":416,"USED_MOBILE":313,"OPEN_INHOUSE":936,"USED_INHOUSE":665},{"BRANCH":"JB ECO","REGION":"SOUTHERN","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":624,"USED_MOBILE":565,"OPEN_INHOUSE":1560,"USED_INHOUSE":1394},{"BRANCH":"JB ECO","REGION":"SOUTHERN","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":624,"USED_MOBILE":553,"OPEN_INHOUSE":1560,"USED_INHOUSE":1416},{"BRANCH":"KAJANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":96,"USED_MOBILE":52,"OPEN_INHOUSE":325,"USED_INHOUSE":276},{"BRANCH":"KAJANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":96,"USED_MOBILE":75,"OPEN_INHOUSE":321,"USED_INHOUSE":297},{"BRANCH":"KAJANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":96,"USED_MOBILE":85,"OPEN_INHOUSE":335,"USED_INHOUSE":343},{"BRANCH":"KAJANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":100,"USED_MOBILE":72,"OPEN_INHOUSE":325,"USED_INHOUSE":334},{"BRANCH":"KAJANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":96,"USED_MOBILE":96,"OPEN_INHOUSE":326,"USED_INHOUSE":306},{"BRANCH":"KAJANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":100,"USED_MOBILE":90,"OPEN_INHOUSE":330,"USED_INHOUSE":309},{"BRANCH":"KAJANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":198,"USED_MOBILE":192,"OPEN_INHOUSE":276,"USED_INHOUSE":276},{"BRANCH":"KAJANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":208,"USED_MOBILE":189,"OPEN_INHOUSE":289,"USED_INHOUSE":289},{"BRANCH":"KAJANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":208,"USED_MOBILE":183,"OPEN_INHOUSE":286,"USED_INHOUSE":286},{"BRANCH":"KAJANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":208,"USED_MOBILE":181,"OPEN_INHOUSE":237,"USED_INHOUSE":237},{"BRANCH":"KAJANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":208,"USED_MOBILE":189,"OPEN_INHOUSE":246,"USED_INHOUSE":246},{"BRANCH":"KAJANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":208,"USED_MOBILE":184,"OPEN_INHOUSE":249,"USED_INHOUSE":249},{"BRANCH":"KOTA BHARU","REGION":"EAST COAST","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":72,"USED_MOBILE":77,"OPEN_INHOUSE":288,"USED_INHOUSE":226},{"BRANCH":"KOTA BHARU","REGION":"EAST COAST","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":68,"USED_MOBILE":62,"OPEN_INHOUSE":288,"USED_INHOUSE":148},{"BRANCH":"KOTA BHARU","REGION":"EAST COAST","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":72,"USED_MOBILE":66,"OPEN_INHOUSE":288,"USED_INHOUSE":154},{"BRANCH":"KOTA BHARU","REGION":"EAST COAST","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":68,"USED_MOBILE":52,"OPEN_INHOUSE":300,"USED_INHOUSE":177},{"BRANCH":"KOTA BHARU","REGION":"EAST COAST","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":74,"USED_MOBILE":62,"OPEN_INHOUSE":252,"USED_INHOUSE":191},{"BRANCH":"KOTA BHARU","REGION":"EAST COAST","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":68,"USED_MOBILE":63,"OPEN_INHOUSE":252,"USED_INHOUSE":199},{"BRANCH":"KOTA BHARU","REGION":"EAST COAST","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":106,"USED_MOBILE":101,"OPEN_INHOUSE":312,"USED_INHOUSE":165},{"BRANCH":"KOTA BHARU","REGION":"EAST COAST","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":96,"USED_MOBILE":91,"OPEN_INHOUSE":312,"USED_INHOUSE":201},{"BRANCH":"KOTA BHARU","REGION":"EAST COAST","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":72,"USED_MOBILE":78,"OPEN_INHOUSE":312,"USED_INHOUSE":198},{"BRANCH":"KOTA BHARU","REGION":"EAST COAST","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":72,"USED_MOBILE":77,"OPEN_INHOUSE":312,"USED_INHOUSE":226},{"BRANCH":"KOTA BHARU","REGION":"EAST COAST","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":72,"USED_MOBILE":77,"OPEN_INHOUSE":312,"USED_INHOUSE":188},{"BRANCH":"KOTA BHARU","REGION":"EAST COAST","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":72,"USED_MOBILE":65,"OPEN_INHOUSE":312,"USED_INHOUSE":191},{"BRANCH":"KOTA KINABALU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":64,"USED_MOBILE":20,"OPEN_INHOUSE":288,"USED_INHOUSE":72},{"BRANCH":"KOTA KINABALU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":68,"USED_MOBILE":28,"OPEN_INHOUSE":288,"USED_INHOUSE":73},{"BRANCH":"KOTA KINABALU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":64,"USED_MOBILE":24,"OPEN_INHOUSE":288,"USED_INHOUSE":74},{"BRANCH":"KOTA KINABALU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":68,"USED_MOBILE":28,"OPEN_INHOUSE":300,"USED_INHOUSE":73},{"BRANCH":"KOTA KINABALU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":52,"USED_MOBILE":45,"OPEN_INHOUSE":252,"USED_INHOUSE":101},{"BRANCH":"KOTA KINABALU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":68,"USED_MOBILE":55,"OPEN_INHOUSE":252,"USED_INHOUSE":160},{"BRANCH":"KOTA KINABALU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":163,"USED_MOBILE":159,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"KOTA KINABALU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":163,"USED_MOBILE":108,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"KOTA KINABALU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":122,"USED_MOBILE":102,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"KOTA KINABALU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":50,"USED_MOBILE":20,"OPEN_INHOUSE":72,"USED_INHOUSE":72},{"BRANCH":"KOTA KINABALU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":50,"USED_MOBILE":32,"OPEN_INHOUSE":312,"USED_INHOUSE":57},{"BRANCH":"KOTA KINABALU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":50,"USED_MOBILE":30,"OPEN_INHOUSE":312,"USED_INHOUSE":55},{"BRANCH":"KUALA TERENGGANU","REGION":"EAST COAST","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":64,"USED_MOBILE":29,"OPEN_INHOUSE":288,"USED_INHOUSE":117},{"BRANCH":"KUALA TERENGGANU","REGION":"EAST COAST","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":68,"USED_MOBILE":20,"OPEN_INHOUSE":288,"USED_INHOUSE":100},{"BRANCH":"KUALA TERENGGANU","REGION":"EAST COAST","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":64,"USED_MOBILE":36,"OPEN_INHOUSE":288,"USED_INHOUSE":111},{"BRANCH":"KUALA TERENGGANU","REGION":"EAST COAST","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":68,"USED_MOBILE":17,"OPEN_INHOUSE":300,"USED_INHOUSE":179},{"BRANCH":"KUALA TERENGGANU","REGION":"EAST COAST","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":252,"USED_INHOUSE":209},{"BRANCH":"KUALA TERENGGANU","REGION":"EAST COAST","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":252,"USED_INHOUSE":180},{"BRANCH":"KUALA TERENGGANU","REGION":"EAST COAST","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":146,"USED_MOBILE":120,"OPEN_INHOUSE":35,"USED_INHOUSE":35},{"BRANCH":"KUALA TERENGGANU","REGION":"EAST COAST","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":152,"USED_MOBILE":147,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"KUALA TERENGGANU","REGION":"EAST COAST","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":144,"USED_MOBILE":141,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"KUALA TERENGGANU","REGION":"EAST COAST","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":72,"USED_MOBILE":29,"OPEN_INHOUSE":312,"USED_INHOUSE":189},{"BRANCH":"KUALA TERENGGANU","REGION":"EAST COAST","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":144,"USED_MOBILE":87,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"KUALA TERENGGANU","REGION":"EAST COAST","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":144,"USED_MOBILE":83,"OPEN_INHOUSE":150,"USED_INHOUSE":69},{"BRANCH":"KUANTAN","REGION":"EAST COAST","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":192,"USED_MOBILE":147,"OPEN_INHOUSE":308,"USED_INHOUSE":295},{"BRANCH":"KUANTAN","REGION":"EAST COAST","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":192,"USED_MOBILE":152,"OPEN_INHOUSE":308,"USED_INHOUSE":236},{"BRANCH":"KUANTAN","REGION":"EAST COAST","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":192,"USED_MOBILE":169,"OPEN_INHOUSE":358,"USED_INHOUSE":310},{"BRANCH":"KUANTAN","REGION":"EAST COAST","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":200,"USED_MOBILE":159,"OPEN_INHOUSE":320,"USED_INHOUSE":252},{"BRANCH":"KUANTAN","REGION":"EAST COAST","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":172,"USED_MOBILE":171,"OPEN_INHOUSE":301,"USED_INHOUSE":240},{"BRANCH":"KUANTAN","REGION":"EAST COAST","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":200,"USED_MOBILE":164,"OPEN_INHOUSE":300,"USED_INHOUSE":295},{"BRANCH":"KUANTAN","REGION":"EAST COAST","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":208,"USED_MOBILE":198,"OPEN_INHOUSE":389,"USED_INHOUSE":312},{"BRANCH":"KUANTAN","REGION":"EAST COAST","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":208,"USED_MOBILE":183,"OPEN_INHOUSE":369,"USED_INHOUSE":308},{"BRANCH":"KUANTAN","REGION":"EAST COAST","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":208,"USED_MOBILE":177,"OPEN_INHOUSE":366,"USED_INHOUSE":302},{"BRANCH":"KUANTAN","REGION":"EAST COAST","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":208,"USED_MOBILE":147,"OPEN_INHOUSE":332,"USED_INHOUSE":295},{"BRANCH":"KUANTAN","REGION":"EAST COAST","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":208,"USED_MOBILE":161,"OPEN_INHOUSE":313,"USED_INHOUSE":211},{"BRANCH":"KUANTAN","REGION":"EAST COAST","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":208,"USED_MOBILE":157,"OPEN_INHOUSE":316,"USED_INHOUSE":217},{"BRANCH":"KUCHING","REGION":"EAST MALAYSIA","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":64,"USED_MOBILE":21,"OPEN_INHOUSE":288,"USED_INHOUSE":61},{"BRANCH":"KUCHING","REGION":"EAST MALAYSIA","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":96,"USED_MOBILE":23,"OPEN_INHOUSE":288,"USED_INHOUSE":36},{"BRANCH":"KUCHING","REGION":"EAST MALAYSIA","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":64,"USED_MOBILE":14,"OPEN_INHOUSE":288,"USED_INHOUSE":48},{"BRANCH":"KUCHING","REGION":"EAST MALAYSIA","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":68,"USED_MOBILE":23,"OPEN_INHOUSE":300,"USED_INHOUSE":63},{"BRANCH":"KUCHING","REGION":"EAST MALAYSIA","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":84,"USED_MOBILE":30,"OPEN_INHOUSE":252,"USED_INHOUSE":22},{"BRANCH":"KUCHING","REGION":"EAST MALAYSIA","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":100,"USED_MOBILE":18,"OPEN_INHOUSE":252,"USED_INHOUSE":57},{"BRANCH":"KUCHING","REGION":"EAST MALAYSIA","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":108,"USED_MOBILE":73,"OPEN_INHOUSE":252,"USED_INHOUSE":33},{"BRANCH":"KUCHING","REGION":"EAST MALAYSIA","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":104,"USED_MOBILE":57,"OPEN_INHOUSE":312,"USED_INHOUSE":38},{"BRANCH":"KUCHING","REGION":"EAST MALAYSIA","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":76,"USED_MOBILE":58,"OPEN_INHOUSE":312,"USED_INHOUSE":35},{"BRANCH":"KUCHING","REGION":"EAST MALAYSIA","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":76,"USED_MOBILE":25,"OPEN_INHOUSE":312,"USED_INHOUSE":61},{"BRANCH":"KUCHING","REGION":"EAST MALAYSIA","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":72,"USED_MOBILE":27,"OPEN_INHOUSE":312,"USED_INHOUSE":22},{"BRANCH":"KUCHING","REGION":"EAST MALAYSIA","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":76,"USED_MOBILE":29,"OPEN_INHOUSE":300,"USED_INHOUSE":46},{"BRANCH":"MELAKA","REGION":"SOUTHERN","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":192,"USED_MOBILE":101,"OPEN_INHOUSE":305,"USED_INHOUSE":224},{"BRANCH":"MELAKA","REGION":"SOUTHERN","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":192,"USED_MOBILE":134,"OPEN_INHOUSE":318,"USED_INHOUSE":242},{"BRANCH":"MELAKA","REGION":"SOUTHERN","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":192,"USED_MOBILE":140,"OPEN_INHOUSE":348,"USED_INHOUSE":278},{"BRANCH":"MELAKA","REGION":"SOUTHERN","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":200,"USED_MOBILE":141,"OPEN_INHOUSE":353,"USED_INHOUSE":282},{"BRANCH":"MELAKA","REGION":"SOUTHERN","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":168,"USED_MOBILE":146,"OPEN_INHOUSE":300,"USED_INHOUSE":222},{"BRANCH":"MELAKA","REGION":"SOUTHERN","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":200,"USED_MOBILE":163,"OPEN_INHOUSE":272,"USED_INHOUSE":272},{"BRANCH":"MELAKA","REGION":"SOUTHERN","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":208,"USED_MOBILE":159,"OPEN_INHOUSE":348,"USED_INHOUSE":304},{"BRANCH":"MELAKA","REGION":"SOUTHERN","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":208,"USED_MOBILE":187,"OPEN_INHOUSE":363,"USED_INHOUSE":299},{"BRANCH":"MELAKA","REGION":"SOUTHERN","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":208,"USED_MOBILE":181,"OPEN_INHOUSE":360,"USED_INHOUSE":293},{"BRANCH":"MELAKA","REGION":"SOUTHERN","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":208,"USED_MOBILE":101,"OPEN_INHOUSE":329,"USED_INHOUSE":224},{"BRANCH":"MELAKA","REGION":"SOUTHERN","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":208,"USED_MOBILE":173,"OPEN_INHOUSE":320,"USED_INHOUSE":287},{"BRANCH":"MELAKA","REGION":"SOUTHERN","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":208,"USED_MOBILE":175,"OPEN_INHOUSE":323,"USED_INHOUSE":293},{"BRANCH":"MELAWATI","REGION":"KLANG VALLEY","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":64,"USED_MOBILE":46,"OPEN_INHOUSE":288,"USED_INHOUSE":42},{"BRANCH":"MELAWATI","REGION":"KLANG VALLEY","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":68,"USED_MOBILE":51,"OPEN_INHOUSE":288,"USED_INHOUSE":22},{"BRANCH":"MELAWATI","REGION":"KLANG VALLEY","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":64,"USED_MOBILE":56,"OPEN_INHOUSE":288,"USED_INHOUSE":40},{"BRANCH":"MELAWATI","REGION":"KLANG VALLEY","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":68,"USED_MOBILE":58,"OPEN_INHOUSE":300,"USED_INHOUSE":43},{"BRANCH":"MELAWATI","REGION":"KLANG VALLEY","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":74,"USED_MOBILE":70,"OPEN_INHOUSE":252,"USED_INHOUSE":68},{"BRANCH":"MELAWATI","REGION":"KLANG VALLEY","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":68,"USED_MOBILE":42,"OPEN_INHOUSE":252,"USED_INHOUSE":38},{"BRANCH":"MELAWATI","REGION":"KLANG VALLEY","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":68,"USED_MOBILE":71,"OPEN_INHOUSE":288,"USED_INHOUSE":63},{"BRANCH":"MELAWATI","REGION":"KLANG VALLEY","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":68,"USED_MOBILE":66,"OPEN_INHOUSE":288,"USED_INHOUSE":66},{"BRANCH":"MELAWATI","REGION":"KLANG VALLEY","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":72,"USED_MOBILE":63,"OPEN_INHOUSE":312,"USED_INHOUSE":63},{"BRANCH":"MELAWATI","REGION":"KLANG VALLEY","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":72,"USED_MOBILE":46,"OPEN_INHOUSE":312,"USED_INHOUSE":42},{"BRANCH":"MELAWATI","REGION":"KLANG VALLEY","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":144,"USED_MOBILE":139,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"MELAWATI","REGION":"KLANG VALLEY","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":144,"USED_MOBILE":135,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"MUAR","REGION":"SOUTHERN","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":96,"USED_MOBILE":17,"OPEN_INHOUSE":288,"USED_INHOUSE":40},{"BRANCH":"MUAR","REGION":"SOUTHERN","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":96,"USED_MOBILE":28,"OPEN_INHOUSE":288,"USED_INHOUSE":74},{"BRANCH":"MUAR","REGION":"SOUTHERN","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":96,"USED_MOBILE":38,"OPEN_INHOUSE":288,"USED_INHOUSE":41},{"BRANCH":"MUAR","REGION":"SOUTHERN","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":100,"USED_MOBILE":29,"OPEN_INHOUSE":300,"USED_INHOUSE":49},{"BRANCH":"MUAR","REGION":"SOUTHERN","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":84,"USED_MOBILE":42,"OPEN_INHOUSE":252,"USED_INHOUSE":116},{"BRANCH":"MUAR","REGION":"SOUTHERN","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":100,"USED_MOBILE":44,"OPEN_INHOUSE":252,"USED_INHOUSE":59},{"BRANCH":"MUAR","REGION":"SOUTHERN","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":104,"USED_MOBILE":59,"OPEN_INHOUSE":333,"USED_INHOUSE":116},{"BRANCH":"MUAR","REGION":"SOUTHERN","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":104,"USED_MOBILE":84,"OPEN_INHOUSE":288,"USED_INHOUSE":77},{"BRANCH":"MUAR","REGION":"SOUTHERN","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":72,"USED_MOBILE":51,"OPEN_INHOUSE":312,"USED_INHOUSE":74},{"BRANCH":"MUAR","REGION":"SOUTHERN","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":72,"USED_MOBILE":17,"OPEN_INHOUSE":312,"USED_INHOUSE":40},{"BRANCH":"MUAR","REGION":"SOUTHERN","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":72,"USED_MOBILE":37,"OPEN_INHOUSE":312,"USED_INHOUSE":30},{"BRANCH":"MUAR","REGION":"SOUTHERN","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":72,"USED_MOBILE":35,"OPEN_INHOUSE":312,"USED_INHOUSE":58},{"BRANCH":"OKR","REGION":"KLANG VALLEY","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":192,"USED_MOBILE":150,"OPEN_INHOUSE":303,"USED_INHOUSE":153},{"BRANCH":"OKR","REGION":"KLANG VALLEY","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":192,"USED_MOBILE":125,"OPEN_INHOUSE":303,"USED_INHOUSE":135},{"BRANCH":"OKR","REGION":"KLANG VALLEY","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":192,"USED_MOBILE":167,"OPEN_INHOUSE":329,"USED_INHOUSE":188},{"BRANCH":"OKR","REGION":"KLANG VALLEY","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":200,"USED_MOBILE":169,"OPEN_INHOUSE":341,"USED_INHOUSE":164},{"BRANCH":"OKR","REGION":"KLANG VALLEY","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":168,"USED_MOBILE":145,"OPEN_INHOUSE":293,"USED_INHOUSE":163},{"BRANCH":"OKR","REGION":"KLANG VALLEY","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":200,"USED_MOBILE":180,"OPEN_INHOUSE":54,"USED_INHOUSE":54},{"BRANCH":"OKR","REGION":"KLANG VALLEY","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":208,"USED_MOBILE":179,"OPEN_INHOUSE":319,"USED_INHOUSE":255},{"BRANCH":"OKR","REGION":"KLANG VALLEY","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":208,"USED_MOBILE":183,"OPEN_INHOUSE":312,"USED_INHOUSE":287},{"BRANCH":"OKR","REGION":"KLANG VALLEY","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":208,"USED_MOBILE":177,"OPEN_INHOUSE":312,"USED_INHOUSE":284},{"BRANCH":"OKR","REGION":"KLANG VALLEY","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":208,"USED_MOBILE":150,"OPEN_INHOUSE":312,"USED_INHOUSE":235},{"BRANCH":"OKR","REGION":"KLANG VALLEY","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":208,"USED_MOBILE":179,"OPEN_INHOUSE":312,"USED_INHOUSE":246},{"BRANCH":"OKR","REGION":"KLANG VALLEY","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":208,"USED_MOBILE":175,"OPEN_INHOUSE":312,"USED_INHOUSE":277},{"BRANCH":"PANTRANS","REGION":"KLANG VALLEY","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":2090,"USED_INHOUSE":1811},{"BRANCH":"PANTRANS","REGION":"KLANG VALLEY","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":2076,"USED_INHOUSE":1867},{"BRANCH":"PANTRANS","REGION":"KLANG VALLEY","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":2097,"USED_INHOUSE":1940},{"BRANCH":"PANTRANS","REGION":"KLANG VALLEY","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":2233,"USED_INHOUSE":1994},{"BRANCH":"PANTRANS","REGION":"KLANG VALLEY","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":2101,"USED_INHOUSE":2101},{"BRANCH":"PANTRANS","REGION":"KLANG VALLEY","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":1915,"USED_INHOUSE":1915},{"BRANCH":"PANTRANS","REGION":"KLANG VALLEY","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":4,"USED_MOBILE":4,"OPEN_INHOUSE":2184,"USED_INHOUSE":1907},{"BRANCH":"PANTRANS","REGION":"KLANG VALLEY","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":2184,"USED_INHOUSE":2093},{"BRANCH":"PANTRANS","REGION":"KLANG VALLEY","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":1560,"USED_INHOUSE":1488},{"BRANCH":"PANTRANS","REGION":"KLANG VALLEY","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":1872,"USED_INHOUSE":1398},{"BRANCH":"PANTRANS","REGION":"KLANG VALLEY","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":1560,"USED_INHOUSE":1334},{"BRANCH":"PANTRANS","REGION":"KLANG VALLEY","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":1560,"USED_INHOUSE":1349},{"BRANCH":"PENANG BAYAN","REGION":"NORTHERN","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":96,"USED_MOBILE":94,"OPEN_INHOUSE":311,"USED_INHOUSE":116},{"BRANCH":"PENANG BAYAN","REGION":"NORTHERN","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":104,"USED_MOBILE":103,"OPEN_INHOUSE":303,"USED_INHOUSE":136},{"BRANCH":"PENANG BAYAN","REGION":"NORTHERN","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":96,"USED_MOBILE":93,"OPEN_INHOUSE":325,"USED_INHOUSE":207},{"BRANCH":"PENANG BAYAN","REGION":"NORTHERN","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":100,"USED_MOBILE":95,"OPEN_INHOUSE":315,"USED_INHOUSE":215},{"BRANCH":"PENANG BAYAN","REGION":"NORTHERN","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":367,"USED_INHOUSE":373},{"BRANCH":"PENANG BAYAN","REGION":"NORTHERN","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":100,"USED_MOBILE":80,"OPEN_INHOUSE":271,"USED_INHOUSE":263},{"BRANCH":"PENANG BAYAN","REGION":"NORTHERN","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":200,"USED_MOBILE":130,"OPEN_INHOUSE":261,"USED_INHOUSE":261},{"BRANCH":"PENANG BAYAN","REGION":"NORTHERN","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":144,"USED_MOBILE":124,"OPEN_INHOUSE":282,"USED_INHOUSE":282},{"BRANCH":"PENANG BAYAN","REGION":"NORTHERN","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":100,"USED_MOBILE":84,"OPEN_INHOUSE":312,"USED_INHOUSE":268},{"BRANCH":"PENANG BAYAN","REGION":"NORTHERN","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":76,"USED_MOBILE":73,"OPEN_INHOUSE":312,"USED_INHOUSE":103},{"BRANCH":"PENANG BAYAN","REGION":"NORTHERN","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":76,"USED_MOBILE":65,"OPEN_INHOUSE":312,"USED_INHOUSE":98},{"BRANCH":"PENANG BAYAN","REGION":"NORTHERN","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":96,"USED_MOBILE":89,"OPEN_INHOUSE":312,"USED_INHOUSE":101},{"BRANCH":"PENANG JURU","REGION":"NORTHERN","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":192,"USED_MOBILE":159,"OPEN_INHOUSE":597,"USED_INHOUSE":445},{"BRANCH":"PENANG JURU","REGION":"NORTHERN","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":192,"USED_MOBILE":161,"OPEN_INHOUSE":605,"USED_INHOUSE":542},{"BRANCH":"PENANG JURU","REGION":"NORTHERN","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":192,"USED_MOBILE":171,"OPEN_INHOUSE":630,"USED_INHOUSE":607},{"BRANCH":"PENANG JURU","REGION":"NORTHERN","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":200,"USED_MOBILE":147,"OPEN_INHOUSE":608,"USED_INHOUSE":608},{"BRANCH":"PENANG JURU","REGION":"NORTHERN","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":181,"USED_MOBILE":118,"OPEN_INHOUSE":534,"USED_INHOUSE":509},{"BRANCH":"PENANG JURU","REGION":"NORTHERN","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":200,"USED_MOBILE":177,"OPEN_INHOUSE":555,"USED_INHOUSE":538},{"BRANCH":"PENANG JURU","REGION":"NORTHERN","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":208,"USED_MOBILE":186,"OPEN_INHOUSE":698,"USED_INHOUSE":668},{"BRANCH":"PENANG JURU","REGION":"NORTHERN","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":208,"USED_MOBILE":175,"OPEN_INHOUSE":726,"USED_INHOUSE":674},{"BRANCH":"PENANG JURU","REGION":"NORTHERN","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":208,"USED_MOBILE":169,"OPEN_INHOUSE":723,"USED_INHOUSE":665},{"BRANCH":"PENANG JURU","REGION":"NORTHERN","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":208,"USED_MOBILE":159,"OPEN_INHOUSE":645,"USED_INHOUSE":445},{"BRANCH":"PENANG JURU","REGION":"NORTHERN","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":312,"USED_MOBILE":218,"OPEN_INHOUSE":624,"USED_INHOUSE":499},{"BRANCH":"PENANG JURU","REGION":"NORTHERN","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":312,"USED_MOBILE":212,"OPEN_INHOUSE":624,"USED_INHOUSE":505},{"BRANCH":"PENANG MEDAN","REGION":"NORTHERN","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":192,"USED_MOBILE":133,"OPEN_INHOUSE":311,"USED_INHOUSE":222},{"BRANCH":"PENANG MEDAN","REGION":"NORTHERN","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":192,"USED_MOBILE":137,"OPEN_INHOUSE":326,"USED_INHOUSE":265},{"BRANCH":"PENANG MEDAN","REGION":"NORTHERN","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":192,"USED_MOBILE":151,"OPEN_INHOUSE":333,"USED_INHOUSE":292},{"BRANCH":"PENANG MEDAN","REGION":"NORTHERN","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":200,"USED_MOBILE":183,"OPEN_INHOUSE":330,"USED_INHOUSE":229},{"BRANCH":"PENANG MEDAN","REGION":"NORTHERN","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":171,"USED_MOBILE":169,"OPEN_INHOUSE":302,"USED_INHOUSE":292},{"BRANCH":"PENANG MEDAN","REGION":"NORTHERN","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":200,"USED_MOBILE":187,"OPEN_INHOUSE":344,"USED_INHOUSE":313},{"BRANCH":"PENANG MEDAN","REGION":"NORTHERN","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":208,"USED_MOBILE":194,"OPEN_INHOUSE":398,"USED_INHOUSE":341},{"BRANCH":"PENANG MEDAN","REGION":"NORTHERN","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":210,"USED_MOBILE":189,"OPEN_INHOUSE":367,"USED_INHOUSE":339},{"BRANCH":"PENANG MEDAN","REGION":"NORTHERN","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":208,"USED_MOBILE":181,"OPEN_INHOUSE":364,"USED_INHOUSE":333},{"BRANCH":"PENANG MEDAN","REGION":"NORTHERN","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":208,"USED_MOBILE":133,"OPEN_INHOUSE":335,"USED_INHOUSE":222},{"BRANCH":"PENANG MEDAN","REGION":"NORTHERN","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":208,"USED_MOBILE":197,"OPEN_INHOUSE":344,"USED_INHOUSE":324},{"BRANCH":"PENANG MEDAN","REGION":"NORTHERN","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":208,"USED_MOBILE":193,"OPEN_INHOUSE":347,"USED_INHOUSE":330},{"BRANCH":"PJ MIDTOWN","REGION":"KLANG VALLEY","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":288,"USED_INHOUSE":151},{"BRANCH":"PJ MIDTOWN","REGION":"KLANG VALLEY","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":288,"USED_INHOUSE":152},{"BRANCH":"PJ MIDTOWN","REGION":"KLANG VALLEY","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":288,"USED_INHOUSE":254},{"BRANCH":"PJ MIDTOWN","REGION":"KLANG VALLEY","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":300,"USED_INHOUSE":113},{"BRANCH":"PJ MIDTOWN","REGION":"KLANG VALLEY","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":252,"USED_INHOUSE":50},{"BRANCH":"PJ MIDTOWN","REGION":"KLANG VALLEY","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":252,"USED_INHOUSE":46},{"BRANCH":"PJ MIDTOWN","REGION":"KLANG VALLEY","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":312,"USED_INHOUSE":77},{"BRANCH":"PJ MIDTOWN","REGION":"KLANG VALLEY","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":104,"USED_MOBILE":75,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"PJ MIDTOWN","REGION":"KLANG VALLEY","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":312,"USED_INHOUSE":72},{"BRANCH":"PJ MIDTOWN","REGION":"KLANG VALLEY","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":312,"USED_INHOUSE":51},{"BRANCH":"PJ MIDTOWN","REGION":"KLANG VALLEY","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":312,"USED_INHOUSE":41},{"BRANCH":"PJ MIDTOWN","REGION":"KLANG VALLEY","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":312,"USED_INHOUSE":39},{"BRANCH":"PUCHONG","REGION":"KLANG VALLEY","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":96,"USED_MOBILE":81,"OPEN_INHOUSE":312,"USED_INHOUSE":222},{"BRANCH":"PUCHONG","REGION":"KLANG VALLEY","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":96,"USED_MOBILE":74,"OPEN_INHOUSE":326,"USED_INHOUSE":260},{"BRANCH":"PUCHONG","REGION":"KLANG VALLEY","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":96,"USED_MOBILE":85,"OPEN_INHOUSE":343,"USED_INHOUSE":294},{"BRANCH":"PUCHONG","REGION":"KLANG VALLEY","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":100,"USED_MOBILE":83,"OPEN_INHOUSE":367,"USED_INHOUSE":323},{"BRANCH":"PUCHONG","REGION":"KLANG VALLEY","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":91,"USED_MOBILE":91,"OPEN_INHOUSE":306,"USED_INHOUSE":260},{"BRANCH":"PUCHONG","REGION":"KLANG VALLEY","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":100,"USED_MOBILE":80,"OPEN_INHOUSE":288,"USED_INHOUSE":255},{"BRANCH":"PUCHONG","REGION":"KLANG VALLEY","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":104,"USED_MOBILE":98,"OPEN_INHOUSE":364,"USED_INHOUSE":328},{"BRANCH":"PUCHONG","REGION":"KLANG VALLEY","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":104,"USED_MOBILE":91,"OPEN_INHOUSE":356,"USED_INHOUSE":305},{"BRANCH":"PUCHONG","REGION":"KLANG VALLEY","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":104,"USED_MOBILE":88,"OPEN_INHOUSE":353,"USED_INHOUSE":299},{"BRANCH":"PUCHONG","REGION":"KLANG VALLEY","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":104,"USED_MOBILE":81,"OPEN_INHOUSE":336,"USED_INHOUSE":222},{"BRANCH":"PUCHONG","REGION":"KLANG VALLEY","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":104,"USED_MOBILE":85,"OPEN_INHOUSE":361,"USED_INHOUSE":234},{"BRANCH":"PUCHONG","REGION":"KLANG VALLEY","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":104,"USED_MOBILE":83,"OPEN_INHOUSE":364,"USED_INHOUSE":240},{"BRANCH":"PUCHONG SOUTH","REGION":"KLANG VALLEY","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":288,"USED_INHOUSE":82},{"BRANCH":"PUCHONG SOUTH","REGION":"KLANG VALLEY","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":288,"USED_INHOUSE":70},{"BRANCH":"PUCHONG SOUTH","REGION":"KLANG VALLEY","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":288,"USED_INHOUSE":76},{"BRANCH":"PUCHONG SOUTH","REGION":"KLANG VALLEY","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":300,"USED_INHOUSE":101},{"BRANCH":"PUCHONG SOUTH","REGION":"KLANG VALLEY","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":252,"USED_INHOUSE":139},{"BRANCH":"PUCHONG SOUTH","REGION":"KLANG VALLEY","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":252,"USED_INHOUSE":153},{"BRANCH":"PUCHONG SOUTH","REGION":"KLANG VALLEY","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":88,"USED_MOBILE":88,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"PUCHONG SOUTH","REGION":"KLANG VALLEY","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":88,"USED_MOBILE":75,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"PUCHONG SOUTH","REGION":"KLANG VALLEY","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":312,"USED_INHOUSE":72},{"BRANCH":"PUCHONG SOUTH","REGION":"KLANG VALLEY","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":312,"USED_INHOUSE":82},{"BRANCH":"PUCHONG SOUTH","REGION":"KLANG VALLEY","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":104,"USED_MOBILE":71,"OPEN_INHOUSE":312,"USED_INHOUSE":89},{"BRANCH":"PUCHONG SOUTH","REGION":"KLANG VALLEY","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":104,"USED_MOBILE":87,"OPEN_INHOUSE":312,"USED_INHOUSE":84},{"BRANCH":"PUTRAJAYA","REGION":"KLANG VALLEY","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":64,"USED_MOBILE":50,"OPEN_INHOUSE":288,"USED_INHOUSE":51},{"BRANCH":"PUTRAJAYA","REGION":"KLANG VALLEY","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":96,"USED_MOBILE":53,"OPEN_INHOUSE":288,"USED_INHOUSE":68},{"BRANCH":"PUTRAJAYA","REGION":"KLANG VALLEY","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":64,"USED_MOBILE":53,"OPEN_INHOUSE":288,"USED_INHOUSE":87},{"BRANCH":"PUTRAJAYA","REGION":"KLANG VALLEY","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":68,"USED_MOBILE":57,"OPEN_INHOUSE":300,"USED_INHOUSE":108},{"BRANCH":"PUTRAJAYA","REGION":"KLANG VALLEY","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":74,"USED_MOBILE":71,"OPEN_INHOUSE":252,"USED_INHOUSE":115},{"BRANCH":"PUTRAJAYA","REGION":"KLANG VALLEY","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":100,"USED_MOBILE":65,"OPEN_INHOUSE":252,"USED_INHOUSE":88},{"BRANCH":"PUTRAJAYA","REGION":"KLANG VALLEY","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":104,"USED_MOBILE":81,"OPEN_INHOUSE":312,"USED_INHOUSE":93},{"BRANCH":"PUTRAJAYA","REGION":"KLANG VALLEY","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":104,"USED_MOBILE":83,"OPEN_INHOUSE":288,"USED_INHOUSE":85},{"BRANCH":"PUTRAJAYA","REGION":"KLANG VALLEY","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":72,"USED_MOBILE":70,"OPEN_INHOUSE":312,"USED_INHOUSE":82},{"BRANCH":"PUTRAJAYA","REGION":"KLANG VALLEY","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":96,"USED_MOBILE":88,"OPEN_INHOUSE":312,"USED_INHOUSE":91},{"BRANCH":"PUTRAJAYA","REGION":"KLANG VALLEY","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":72,"USED_MOBILE":81,"OPEN_INHOUSE":312,"USED_INHOUSE":85},{"BRANCH":"PUTRAJAYA","REGION":"KLANG VALLEY","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":72,"USED_MOBILE":67,"OPEN_INHOUSE":312,"USED_INHOUSE":92},{"BRANCH":"SELAYANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":192,"USED_MOBILE":119,"OPEN_INHOUSE":298,"USED_INHOUSE":185},{"BRANCH":"SELAYANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":192,"USED_MOBILE":122,"OPEN_INHOUSE":291,"USED_INHOUSE":236},{"BRANCH":"SELAYANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":192,"USED_MOBILE":147,"OPEN_INHOUSE":308,"USED_INHOUSE":218},{"BRANCH":"SELAYANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":200,"USED_MOBILE":145,"OPEN_INHOUSE":320,"USED_INHOUSE":208},{"BRANCH":"SELAYANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":169,"USED_MOBILE":161,"OPEN_INHOUSE":272,"USED_INHOUSE":216},{"BRANCH":"SELAYANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":200,"USED_MOBILE":167,"OPEN_INHOUSE":285,"USED_INHOUSE":234},{"BRANCH":"SELAYANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":295,"USED_MOBILE":267,"OPEN_INHOUSE":312,"USED_INHOUSE":262},{"BRANCH":"SELAYANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":312,"USED_MOBILE":274,"OPEN_INHOUSE":312,"USED_INHOUSE":255},{"BRANCH":"SELAYANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":312,"USED_MOBILE":265,"OPEN_INHOUSE":312,"USED_INHOUSE":252},{"BRANCH":"SELAYANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":312,"USED_MOBILE":254,"OPEN_INHOUSE":312,"USED_INHOUSE":210},{"BRANCH":"SELAYANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":312,"USED_MOBILE":258,"OPEN_INHOUSE":312,"USED_INHOUSE":241},{"BRANCH":"SELAYANG","REGION":"KLANG VALLEY","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":312,"USED_MOBILE":251,"OPEN_INHOUSE":312,"USED_INHOUSE":234},{"BRANCH":"SEREMBAN","REGION":"SOUTHERN","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":96,"USED_MOBILE":59,"OPEN_INHOUSE":402,"USED_INHOUSE":271},{"BRANCH":"SEREMBAN","REGION":"SOUTHERN","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":96,"USED_MOBILE":54,"OPEN_INHOUSE":383,"USED_INHOUSE":230},{"BRANCH":"SEREMBAN","REGION":"SOUTHERN","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":96,"USED_MOBILE":82,"OPEN_INHOUSE":413,"USED_INHOUSE":311},{"BRANCH":"SEREMBAN","REGION":"SOUTHERN","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":100,"USED_MOBILE":83,"OPEN_INHOUSE":393,"USED_INHOUSE":280},{"BRANCH":"SEREMBAN","REGION":"SOUTHERN","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":87,"USED_MOBILE":87,"OPEN_INHOUSE":392,"USED_INHOUSE":371},{"BRANCH":"SEREMBAN","REGION":"SOUTHERN","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":100,"USED_MOBILE":85,"OPEN_INHOUSE":349,"USED_INHOUSE":281},{"BRANCH":"SEREMBAN","REGION":"SOUTHERN","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":104,"USED_MOBILE":77,"OPEN_INHOUSE":453,"USED_INHOUSE":412},{"BRANCH":"SEREMBAN","REGION":"SOUTHERN","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":104,"USED_MOBILE":88,"OPEN_INHOUSE":402,"USED_INHOUSE":386},{"BRANCH":"SEREMBAN","REGION":"SOUTHERN","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":104,"USED_MOBILE":85,"OPEN_INHOUSE":395,"USED_INHOUSE":376},{"BRANCH":"SEREMBAN","REGION":"SOUTHERN","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":104,"USED_MOBILE":59,"OPEN_INHOUSE":426,"USED_INHOUSE":271},{"BRANCH":"SEREMBAN","REGION":"SOUTHERN","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":104,"USED_MOBILE":68,"OPEN_INHOUSE":535,"USED_INHOUSE":459},{"BRANCH":"SEREMBAN","REGION":"SOUTHERN","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":104,"USED_MOBILE":66,"OPEN_INHOUSE":538,"USED_INHOUSE":465},{"BRANCH":"SETAPAK","REGION":"KLANG VALLEY","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":64,"USED_MOBILE":42,"OPEN_INHOUSE":288,"USED_INHOUSE":49},{"BRANCH":"SETAPAK","REGION":"KLANG VALLEY","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":68,"USED_MOBILE":33,"OPEN_INHOUSE":288,"USED_INHOUSE":54},{"BRANCH":"SETAPAK","REGION":"KLANG VALLEY","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":64,"USED_MOBILE":57,"OPEN_INHOUSE":288,"USED_INHOUSE":90},{"BRANCH":"SETAPAK","REGION":"KLANG VALLEY","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":100,"USED_MOBILE":34,"OPEN_INHOUSE":300,"USED_INHOUSE":103},{"BRANCH":"SETAPAK","REGION":"KLANG VALLEY","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":52,"USED_MOBILE":44,"OPEN_INHOUSE":252,"USED_INHOUSE":119},{"BRANCH":"SETAPAK","REGION":"KLANG VALLEY","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":68,"USED_MOBILE":39,"OPEN_INHOUSE":252,"USED_INHOUSE":149},{"BRANCH":"SETAPAK","REGION":"KLANG VALLEY","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":147,"USED_MOBILE":154,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"SETAPAK","REGION":"KLANG VALLEY","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":183,"USED_MOBILE":174,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"SETAPAK","REGION":"KLANG VALLEY","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":141,"USED_MOBILE":141,"OPEN_INHOUSE":280,"USED_INHOUSE":271},{"BRANCH":"SETAPAK","REGION":"KLANG VALLEY","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":104,"USED_MOBILE":84,"OPEN_INHOUSE":312,"USED_INHOUSE":299},{"BRANCH":"SETAPAK","REGION":"KLANG VALLEY","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":104,"USED_MOBILE":51,"OPEN_INHOUSE":312,"USED_INHOUSE":274},{"BRANCH":"SETAPAK","REGION":"KLANG VALLEY","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":104,"USED_MOBILE":49,"OPEN_INHOUSE":312,"USED_INHOUSE":272},{"BRANCH":"SETIA ALAM","REGION":"KLANG VALLEY","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":288,"USED_MOBILE":189,"OPEN_INHOUSE":315,"USED_INHOUSE":295},{"BRANCH":"SETIA ALAM","REGION":"KLANG VALLEY","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":288,"USED_MOBILE":234,"OPEN_INHOUSE":315,"USED_INHOUSE":257},{"BRANCH":"SETIA ALAM","REGION":"KLANG VALLEY","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":300,"USED_MOBILE":291,"OPEN_INHOUSE":319,"USED_INHOUSE":322},{"BRANCH":"SETIA ALAM","REGION":"KLANG VALLEY","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":300,"USED_MOBILE":251,"OPEN_INHOUSE":331,"USED_INHOUSE":257},{"BRANCH":"SETIA ALAM","REGION":"KLANG VALLEY","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":265,"USED_MOBILE":262,"OPEN_INHOUSE":283,"USED_INHOUSE":260},{"BRANCH":"SETIA ALAM","REGION":"KLANG VALLEY","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":300,"USED_MOBILE":253,"OPEN_INHOUSE":283,"USED_INHOUSE":255},{"BRANCH":"SETIA ALAM","REGION":"KLANG VALLEY","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":409,"USED_MOBILE":382,"OPEN_INHOUSE":312,"USED_INHOUSE":285},{"BRANCH":"SETIA ALAM","REGION":"KLANG VALLEY","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":416,"USED_MOBILE":367,"OPEN_INHOUSE":312,"USED_INHOUSE":255},{"BRANCH":"SETIA ALAM","REGION":"KLANG VALLEY","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":416,"USED_MOBILE":355,"OPEN_INHOUSE":312,"USED_INHOUSE":252},{"BRANCH":"SETIA ALAM","REGION":"KLANG VALLEY","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":312,"USED_MOBILE":259,"OPEN_INHOUSE":624,"USED_INHOUSE":489},{"BRANCH":"SETIA ALAM","REGION":"KLANG VALLEY","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":416,"USED_MOBILE":302,"OPEN_INHOUSE":624,"USED_INHOUSE":476},{"BRANCH":"SETIA ALAM","REGION":"KLANG VALLEY","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":416,"USED_MOBILE":312,"OPEN_INHOUSE":624,"USED_INHOUSE":457},{"BRANCH":"SUNGAI BULOH","REGION":"KLANG VALLEY","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":64,"USED_MOBILE":46,"OPEN_INHOUSE":288,"USED_INHOUSE":281},{"BRANCH":"SUNGAI BULOH","REGION":"KLANG VALLEY","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":68,"USED_MOBILE":31,"OPEN_INHOUSE":288,"USED_INHOUSE":152},{"BRANCH":"SUNGAI BULOH","REGION":"KLANG VALLEY","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":64,"USED_MOBILE":41,"OPEN_INHOUSE":288,"USED_INHOUSE":105},{"BRANCH":"SUNGAI BULOH","REGION":"KLANG VALLEY","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":68,"USED_MOBILE":33,"OPEN_INHOUSE":300,"USED_INHOUSE":133},{"BRANCH":"SUNGAI BULOH","REGION":"KLANG VALLEY","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":52,"USED_MOBILE":49,"OPEN_INHOUSE":252,"USED_INHOUSE":172},{"BRANCH":"SUNGAI BULOH","REGION":"KLANG VALLEY","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":68,"USED_MOBILE":70,"OPEN_INHOUSE":252,"USED_INHOUSE":119},{"BRANCH":"SUNGAI BULOH","REGION":"KLANG VALLEY","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":183,"USED_MOBILE":179,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"SUNGAI BULOH","REGION":"KLANG VALLEY","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":179,"USED_MOBILE":177,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"SUNGAI BULOH","REGION":"KLANG VALLEY","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":187,"USED_MOBILE":161,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"SUNGAI BULOH","REGION":"KLANG VALLEY","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":187,"USED_MOBILE":174,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"SUNGAI BULOH","REGION":"KLANG VALLEY","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":204,"USED_MOBILE":178,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"SUNGAI BULOH","REGION":"KLANG VALLEY","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":204,"USED_MOBILE":178,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"SUNGAI PETANI","REGION":"NORTHERN","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":64,"USED_MOBILE":38,"OPEN_INHOUSE":288,"USED_INHOUSE":114},{"BRANCH":"SUNGAI PETANI","REGION":"NORTHERN","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":68,"USED_MOBILE":35,"OPEN_INHOUSE":288,"USED_INHOUSE":120},{"BRANCH":"SUNGAI PETANI","REGION":"NORTHERN","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":64,"USED_MOBILE":45,"OPEN_INHOUSE":288,"USED_INHOUSE":155},{"BRANCH":"SUNGAI PETANI","REGION":"NORTHERN","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":68,"USED_MOBILE":46,"OPEN_INHOUSE":300,"USED_INHOUSE":174},{"BRANCH":"SUNGAI PETANI","REGION":"NORTHERN","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":74,"USED_MOBILE":60,"OPEN_INHOUSE":252,"USED_INHOUSE":173},{"BRANCH":"SUNGAI PETANI","REGION":"NORTHERN","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":100,"USED_MOBILE":38,"OPEN_INHOUSE":252,"USED_INHOUSE":91},{"BRANCH":"SUNGAI PETANI","REGION":"NORTHERN","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":204,"USED_MOBILE":197,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"SUNGAI PETANI","REGION":"NORTHERN","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":204,"USED_MOBILE":188,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"SUNGAI PETANI","REGION":"NORTHERN","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":176,"USED_MOBILE":152,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"SUNGAI PETANI","REGION":"NORTHERN","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":104,"USED_MOBILE":38,"OPEN_INHOUSE":312,"USED_INHOUSE":114},{"BRANCH":"SUNGAI PETANI","REGION":"NORTHERN","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":176,"USED_MOBILE":162,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"SUNGAI PETANI","REGION":"NORTHERN","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":176,"USED_MOBILE":158,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"TAMAN MEGAH","REGION":"KLANG VALLEY","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":192,"USED_MOBILE":181,"OPEN_INHOUSE":301,"USED_INHOUSE":300},{"BRANCH":"TAMAN MEGAH","REGION":"KLANG VALLEY","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":192,"USED_MOBILE":135,"OPEN_INHOUSE":312,"USED_INHOUSE":302},{"BRANCH":"TAMAN MEGAH","REGION":"KLANG VALLEY","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":192,"USED_MOBILE":157,"OPEN_INHOUSE":303,"USED_INHOUSE":282},{"BRANCH":"TAMAN MEGAH","REGION":"KLANG VALLEY","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":200,"USED_MOBILE":176,"OPEN_INHOUSE":333,"USED_INHOUSE":264},{"BRANCH":"TAMAN MEGAH","REGION":"KLANG VALLEY","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":168,"USED_MOBILE":161,"OPEN_INHOUSE":260,"USED_INHOUSE":234},{"BRANCH":"TAMAN MEGAH","REGION":"KLANG VALLEY","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":200,"USED_MOBILE":176,"OPEN_INHOUSE":262,"USED_INHOUSE":214},{"BRANCH":"TAMAN MEGAH","REGION":"KLANG VALLEY","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":208,"USED_MOBILE":190,"OPEN_INHOUSE":360,"USED_INHOUSE":312},{"BRANCH":"TAMAN MEGAH","REGION":"KLANG VALLEY","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":208,"USED_MOBILE":174,"OPEN_INHOUSE":358,"USED_INHOUSE":304},{"BRANCH":"TAMAN MEGAH","REGION":"KLANG VALLEY","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":208,"USED_MOBILE":168,"OPEN_INHOUSE":355,"USED_INHOUSE":298},{"BRANCH":"TAMAN MEGAH","REGION":"KLANG VALLEY","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":208,"USED_MOBILE":181,"OPEN_INHOUSE":325,"USED_INHOUSE":300},{"BRANCH":"TAMAN MEGAH","REGION":"KLANG VALLEY","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":208,"USED_MOBILE":145,"OPEN_INHOUSE":345,"USED_INHOUSE":298},{"BRANCH":"TAMAN MEGAH","REGION":"KLANG VALLEY","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":208,"USED_MOBILE":157,"OPEN_INHOUSE":348,"USED_INHOUSE":304},{"BRANCH":"TAWAU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":288,"USED_INHOUSE":52},{"BRANCH":"TAWAU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":288,"USED_INHOUSE":52},{"BRANCH":"TAWAU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":288,"USED_INHOUSE":38},{"BRANCH":"TAWAU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":300,"USED_INHOUSE":64},{"BRANCH":"TAWAU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":252,"USED_INHOUSE":88},{"BRANCH":"TAWAU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":0,"USED_MOBILE":0,"OPEN_INHOUSE":252,"USED_INHOUSE":123},{"BRANCH":"TAWAU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":1,"USED_MOBILE":1,"OPEN_INHOUSE":252,"USED_INHOUSE":38},{"BRANCH":"TAWAU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":68,"USED_MOBILE":50,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"TAWAU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":68,"USED_MOBILE":47,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"TAWAU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":104,"USED_MOBILE":68,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"TAWAU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":104,"USED_MOBILE":50,"OPEN_INHOUSE":0,"USED_INHOUSE":0},{"BRANCH":"TAWAU","REGION":"EAST MALAYSIA","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":104,"USED_MOBILE":48,"OPEN_INHOUSE":0,"USED_INHOUSE":0}],"monthly":[{"MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":3912,"USED_MOBILE":2808,"OPEN_INHOUSE":13423,"USED_INHOUSE":8551},{"MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":4008,"USED_MOBILE":2823,"OPEN_INHOUSE":13319,"USED_INHOUSE":8672},{"MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":3928,"USED_MOBILE":3133,"OPEN_INHOUSE":13626,"USED_INHOUSE":9585},{"MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":4144,"USED_MOBILE":3107,"OPEN_INHOUSE":14040,"USED_INHOUSE":9474},{"MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":3580,"USED_MOBILE":3262,"OPEN_INHOUSE":12429,"USED_INHOUSE":9871},{"MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":4168,"USED_MOBILE":3384,"OPEN_INHOUSE":11775,"USED_INHOUSE":9231},{"MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":5718,"USED_MOBILE":5163,"OPEN_INHOUSE":12344,"USED_INHOUSE":9342},{"MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":5707,"USED_MOBILE":4974,"OPEN_INHOUSE":11423,"USED_INHOUSE":9416},{"MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":5254,"USED_MOBILE":4502,"OPEN_INHOUSE":11762,"USED_INHOUSE":9087},{"MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":4829,"USED_MOBILE":3480,"OPEN_INHOUSE":13006,"USED_INHOUSE":8390},{"MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":5554,"USED_MOBILE":4440,"OPEN_INHOUSE":12796,"USED_INHOUSE":9026},{"MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":5578,"USED_MOBILE":4394,"OPEN_INHOUSE":12967,"USED_INHOUSE":9269}],"region_monthly":[{"REGION":"EAST COAST","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":328,"USED_MOBILE":253,"OPEN_INHOUSE":884,"USED_INHOUSE":638},{"REGION":"EAST COAST","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":328,"USED_MOBILE":234,"OPEN_INHOUSE":884,"USED_INHOUSE":484},{"REGION":"EAST COAST","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":328,"USED_MOBILE":271,"OPEN_INHOUSE":934,"USED_INHOUSE":575},{"REGION":"EAST COAST","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":336,"USED_MOBILE":228,"OPEN_INHOUSE":920,"USED_INHOUSE":608},{"REGION":"EAST COAST","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":246,"USED_MOBILE":233,"OPEN_INHOUSE":805,"USED_INHOUSE":640},{"REGION":"EAST COAST","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":268,"USED_MOBILE":227,"OPEN_INHOUSE":804,"USED_INHOUSE":674},{"REGION":"EAST COAST","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":460,"USED_MOBILE":419,"OPEN_INHOUSE":736,"USED_INHOUSE":512},{"REGION":"EAST COAST","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":456,"USED_MOBILE":421,"OPEN_INHOUSE":681,"USED_INHOUSE":509},{"REGION":"EAST COAST","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":424,"USED_MOBILE":396,"OPEN_INHOUSE":678,"USED_INHOUSE":500},{"REGION":"EAST COAST","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":352,"USED_MOBILE":253,"OPEN_INHOUSE":956,"USED_INHOUSE":710},{"REGION":"EAST COAST","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":424,"USED_MOBILE":325,"OPEN_INHOUSE":625,"USED_INHOUSE":399},{"REGION":"EAST COAST","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":424,"USED_MOBILE":305,"OPEN_INHOUSE":778,"USED_INHOUSE":477},{"REGION":"EAST MALAYSIA","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":128,"USED_MOBILE":41,"OPEN_INHOUSE":864,"USED_INHOUSE":185},{"REGION":"EAST MALAYSIA","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":164,"USED_MOBILE":51,"OPEN_INHOUSE":864,"USED_INHOUSE":161},{"REGION":"EAST MALAYSIA","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":128,"USED_MOBILE":38,"OPEN_INHOUSE":864,"USED_INHOUSE":160},{"REGION":"EAST MALAYSIA","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":136,"USED_MOBILE":51,"OPEN_INHOUSE":900,"USED_INHOUSE":200},{"REGION":"EAST MALAYSIA","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":136,"USED_MOBILE":75,"OPEN_INHOUSE":756,"USED_INHOUSE":211},{"REGION":"EAST MALAYSIA","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":168,"USED_MOBILE":73,"OPEN_INHOUSE":756,"USED_INHOUSE":340},{"REGION":"EAST MALAYSIA","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":272,"USED_MOBILE":233,"OPEN_INHOUSE":504,"USED_INHOUSE":71},{"REGION":"EAST MALAYSIA","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":335,"USED_MOBILE":215,"OPEN_INHOUSE":312,"USED_INHOUSE":38},{"REGION":"EAST MALAYSIA","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":266,"USED_MOBILE":207,"OPEN_INHOUSE":312,"USED_INHOUSE":35},{"REGION":"EAST MALAYSIA","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":230,"USED_MOBILE":113,"OPEN_INHOUSE":384,"USED_INHOUSE":133},{"REGION":"EAST MALAYSIA","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":226,"USED_MOBILE":109,"OPEN_INHOUSE":624,"USED_INHOUSE":79},{"REGION":"EAST MALAYSIA","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":230,"USED_MOBILE":107,"OPEN_INHOUSE":612,"USED_INHOUSE":101},{"REGION":"KLANG VALLEY","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":1856,"USED_MOBILE":1424,"OPEN_INHOUSE":6884,"USED_INHOUSE":4634},{"REGION":"KLANG VALLEY","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":1904,"USED_MOBILE":1399,"OPEN_INHOUSE":6870,"USED_INHOUSE":4778},{"REGION":"KLANG VALLEY","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":1872,"USED_MOBILE":1625,"OPEN_INHOUSE":6960,"USED_INHOUSE":5151},{"REGION":"KLANG VALLEY","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":1972,"USED_MOBILE":1551,"OPEN_INHOUSE":7295,"USED_INHOUSE":4980},{"REGION":"KLANG VALLEY","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":1757,"USED_MOBILE":1686,"OPEN_INHOUSE":6387,"USED_INHOUSE":5028},{"REGION":"KLANG VALLEY","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":1972,"USED_MOBILE":1702,"OPEN_INHOUSE":6024,"USED_INHOUSE":4772},{"REGION":"KLANG VALLEY","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":2733,"USED_MOBILE":2561,"OPEN_INHOUSE":6328,"USED_INHOUSE":4925},{"REGION":"KLANG VALLEY","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":2902,"USED_MOBILE":2594,"OPEN_INHOUSE":5994,"USED_INHOUSE":5033},{"REGION":"KLANG VALLEY","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":2656,"USED_MOBILE":2311,"OPEN_INHOUSE":6307,"USED_INHOUSE":4791},{"REGION":"KLANG VALLEY","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":2435,"USED_MOBILE":1966,"OPEN_INHOUSE":6886,"USED_INHOUSE":4705},{"REGION":"KLANG VALLEY","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":2708,"USED_MOBILE":2182,"OPEN_INHOUSE":6419,"USED_INHOUSE":4635},{"REGION":"KLANG VALLEY","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":2708,"USED_MOBILE":2170,"OPEN_INHOUSE":6431,"USED_INHOUSE":4683},{"REGION":"NORTHERN","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":832,"USED_MOBILE":620,"OPEN_INHOUSE":2274,"USED_INHOUSE":1490},{"REGION":"NORTHERN","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":844,"USED_MOBILE":613,"OPEN_INHOUSE":2180,"USED_INHOUSE":1576},{"REGION":"NORTHERN","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":832,"USED_MOBILE":670,"OPEN_INHOUSE":2295,"USED_INHOUSE":1817},{"REGION":"NORTHERN","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":868,"USED_MOBILE":681,"OPEN_INHOUSE":2307,"USED_INHOUSE":1777},{"REGION":"NORTHERN","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":689,"USED_MOBILE":591,"OPEN_INHOUSE":2195,"USED_INHOUSE":2034},{"REGION":"NORTHERN","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":900,"USED_MOBILE":727,"OPEN_INHOUSE":1940,"USED_INHOUSE":1647},{"REGION":"NORTHERN","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":1132,"USED_MOBILE":996,"OPEN_INHOUSE":2047,"USED_INHOUSE":1896},{"REGION":"NORTHERN","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":1078,"USED_MOBILE":929,"OPEN_INHOUSE":2085,"USED_INHOUSE":1898},{"REGION":"NORTHERN","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":1004,"USED_MOBILE":830,"OPEN_INHOUSE":2103,"USED_INHOUSE":1857},{"REGION":"NORTHERN","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":908,"USED_MOBILE":599,"OPEN_INHOUSE":2419,"USED_INHOUSE":1477},{"REGION":"NORTHERN","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":1084,"USED_MOBILE":899,"OPEN_INHOUSE":2088,"USED_INHOUSE":1622},{"REGION":"NORTHERN","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":1104,"USED_MOBILE":903,"OPEN_INHOUSE":2097,"USED_INHOUSE":1649},{"REGION":"SOUTHERN","MONTH_STR":"2025-01","MONTH_LABEL":"Jan 2025","OPEN_MOBILE":768,"USED_MOBILE":470,"OPEN_INHOUSE":2517,"USED_INHOUSE":1604},{"REGION":"SOUTHERN","MONTH_STR":"2025-02","MONTH_LABEL":"Feb 2025","OPEN_MOBILE":768,"USED_MOBILE":526,"OPEN_INHOUSE":2521,"USED_INHOUSE":1673},{"REGION":"SOUTHERN","MONTH_STR":"2025-03","MONTH_LABEL":"Mar 2025","OPEN_MOBILE":768,"USED_MOBILE":529,"OPEN_INHOUSE":2573,"USED_INHOUSE":1882},{"REGION":"SOUTHERN","MONTH_STR":"2025-04","MONTH_LABEL":"Apr 2025","OPEN_MOBILE":832,"USED_MOBILE":596,"OPEN_INHOUSE":2618,"USED_INHOUSE":1909},{"REGION":"SOUTHERN","MONTH_STR":"2025-05","MONTH_LABEL":"May 2025","OPEN_MOBILE":752,"USED_MOBILE":677,"OPEN_INHOUSE":2286,"USED_INHOUSE":1958},{"REGION":"SOUTHERN","MONTH_STR":"2025-06","MONTH_LABEL":"Jun 2025","OPEN_MOBILE":860,"USED_MOBILE":655,"OPEN_INHOUSE":2251,"USED_INHOUSE":1798},{"REGION":"SOUTHERN","MONTH_STR":"2025-07","MONTH_LABEL":"Jul 2025","OPEN_MOBILE":1121,"USED_MOBILE":954,"OPEN_INHOUSE":2729,"USED_INHOUSE":1938},{"REGION":"SOUTHERN","MONTH_STR":"2025-08","MONTH_LABEL":"Aug 2025","OPEN_MOBILE":936,"USED_MOBILE":815,"OPEN_INHOUSE":2351,"USED_INHOUSE":1938},{"REGION":"SOUTHERN","MONTH_STR":"2025-09","MONTH_LABEL":"Sep 2025","OPEN_MOBILE":904,"USED_MOBILE":758,"OPEN_INHOUSE":2362,"USED_INHOUSE":1904},{"REGION":"SOUTHERN","MONTH_STR":"2025-10","MONTH_LABEL":"Oct 2025","OPEN_MOBILE":904,"USED_MOBILE":549,"OPEN_INHOUSE":2361,"USED_INHOUSE":1365},{"REGION":"SOUTHERN","MONTH_STR":"2025-11","MONTH_LABEL":"Nov 2025","OPEN_MOBILE":1112,"USED_MOBILE":925,"OPEN_INHOUSE":3040,"USED_INHOUSE":2291},{"REGION":"SOUTHERN","MONTH_STR":"2025-12","MONTH_LABEL":"Dec 2025","OPEN_MOBILE":1112,"USED_MOBILE":909,"OPEN_INHOUSE":3049,"USED_INHOUSE":2359}]};
 
-        // Staff search
-        function searchStaff() {
-            const query = document.getElementById('staffSearch').value.toLowerCase();
-            const cards = document.querySelectorAll('.staff-card');
+// ─────────────── HELPERS ───────────────
+const fmt = n => n.toLocaleString();
+const pct = (u,o) => o>0 ? ((u/o)*100).toFixed(1)+'%' : 'N/A';
+const pctNum = (u,o) => o>0 ? (u/o)*100 : 0;
+const MONTHS = ["2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12"];
+const MLABELS = {"2025-01":"Jan","2025-02":"Feb","2025-03":"Mar","2025-04":"Apr","2025-05":"May","2025-06":"Jun","2025-07":"Jul","2025-08":"Aug","2025-09":"Sep","2025-10":"Oct","2025-11":"Nov","2025-12":"Dec"};
+const REGIONS = ["EAST COAST","EAST MALAYSIA","KLANG VALLEY","NORTHERN","SOUTHERN"];
+const BRANCHES = [...new Set(RAW.branch_monthly.map(d=>d.BRANCH))].sort();
 
-            cards.forEach(card => {
-                const name = card.dataset.name;
-                const branch = card.dataset.branch;
-                if (name.includes(query) || branch.includes(query)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
+let charts = {};
+let staffPage = 0;
+const STAFF_PER_PAGE = 24;
 
-        // Download PPTX function (placeholder - creates a simple alert)
-        function downloadPPTX() {
-            alert('PPTX Download Feature:\n\nIn a production environment, this would generate a PowerPoint presentation with all dashboard charts and tables.\n\nFor now, you can use the browser print function (Ctrl+P) to save as PDF, or export the data to Excel.');
-        }
+function utilColor(pct){
+  if(pct>=80) return '#27AE60';
+  if(pct>=60) return '#F39C12';
+  return '#E74C3C';
+}
 
-        // Intersection Observer for animations
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, { threshold: 0.1 });
+// ─────────────── INIT DROPDOWNS ───────────────
+function initDropdowns(){
+  const gm = document.getElementById('globalMonth');
+  const gr = document.getElementById('globalRegion');
+  const bf = document.getElementById('branchRegionFilter');
+  const bt = document.getElementById('branchTableRegion');
+  const sf = document.getElementById('staffRegionFilter');
 
-        document.querySelectorAll('.animate-in').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(20px)';
-            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(el);
-        });
-    </script>
+  MONTHS.forEach(m=>{
+    const o = document.createElement('option');
+    o.value=m; o.textContent=MLABELS[m]+' 2025';
+    gm.appendChild(o);
+  });
+  REGIONS.forEach(r=>{
+    [gr,bf,bt,sf].forEach(sel=>{
+      const o=document.createElement('option'); o.value=r; o.textContent=r;
+      sel.appendChild(o);
+    });
+  });
+}
+
+// ─────────────── FILTER DATA ───────────────
+function getMonth(){ return document.getElementById('globalMonth').value; }
+function getRegion(){ return document.getElementById('globalRegion').value; }
+
+function getFilteredMonthly(){
+  const m=getMonth(), r=getRegion();
+  if(m==='ALL' && r==='ALL') return RAW.monthly;
+  // aggregate branch_monthly filtered by region
+  const rows = RAW.branch_monthly.filter(d=>(m==='ALL'||d.MONTH_STR===m)&&(r==='ALL'||d.REGION===r));
+  const byMonth={};
+  rows.forEach(d=>{
+    if(!byMonth[d.MONTH_STR]) byMonth[d.MONTH_STR]={MONTH_STR:d.MONTH_STR,MONTH_LABEL:d.MONTH_LABEL,OPEN_MOBILE:0,USED_MOBILE:0,OPEN_INHOUSE:0,USED_INHOUSE:0};
+    const b=byMonth[d.MONTH_STR];
+    b.OPEN_MOBILE+=d.OPEN_MOBILE; b.USED_MOBILE+=d.USED_MOBILE;
+    b.OPEN_INHOUSE+=d.OPEN_INHOUSE; b.USED_INHOUSE+=d.USED_INHOUSE;
+  });
+  return Object.values(byMonth).sort((a,b)=>a.MONTH_STR.localeCompare(b.MONTH_STR));
+}
+
+function getFilteredRegion(){
+  const m=getMonth(), r=getRegion();
+  const rows = RAW.region_monthly.filter(d=>(m==='ALL'||d.MONTH_STR===m)&&(r==='ALL'||d.REGION===r));
+  const byRegion={};
+  rows.forEach(d=>{
+    if(!byRegion[d.REGION]) byRegion[d.REGION]={REGION:d.REGION,OPEN_MOBILE:0,USED_MOBILE:0,OPEN_INHOUSE:0,USED_INHOUSE:0};
+    const b=byRegion[d.REGION];
+    b.OPEN_MOBILE+=d.OPEN_MOBILE; b.USED_MOBILE+=d.USED_MOBILE;
+    b.OPEN_INHOUSE+=d.OPEN_INHOUSE; b.USED_INHOUSE+=d.USED_INHOUSE;
+  });
+  return Object.values(byRegion);
+}
+
+function getBranchData(){
+  const m=getMonth(), r=document.getElementById('branchRegionFilter').value, s=document.getElementById('branchSort').value;
+  const rows = RAW.branch_monthly.filter(d=>(m==='ALL'||d.MONTH_STR===m)&&(r==='ALL'||d.REGION===r));
+  const byBranch={};
+  rows.forEach(d=>{
+    if(!byBranch[d.BRANCH]) byBranch[d.BRANCH]={BRANCH:d.BRANCH,REGION:d.REGION,OPEN_MOBILE:0,USED_MOBILE:0,OPEN_INHOUSE:0,USED_INHOUSE:0};
+    const b=byBranch[d.BRANCH];
+    b.OPEN_MOBILE+=d.OPEN_MOBILE; b.USED_MOBILE+=d.USED_MOBILE;
+    b.OPEN_INHOUSE+=d.OPEN_INHOUSE; b.USED_INHOUSE+=d.USED_INHOUSE;
+  });
+  let arr=Object.values(byBranch).map(d=>({...d,TOTAL_OPEN:d.OPEN_MOBILE+d.OPEN_INHOUSE,TOTAL_USED:d.USED_MOBILE+d.USED_INHOUSE,UTIL:pctNum(d.USED_MOBILE+d.USED_INHOUSE,d.OPEN_MOBILE+d.OPEN_INHOUSE)}));
+  if(s==='util_desc') arr.sort((a,b)=>b.UTIL-a.UTIL);
+  else if(s==='util_asc') arr.sort((a,b)=>a.UTIL-b.UTIL);
+  else if(s==='used_desc') arr.sort((a,b)=>b.TOTAL_USED-a.TOTAL_USED);
+  else arr.sort((a,b)=>a.BRANCH.localeCompare(b.BRANCH));
+  return arr;
+}
+
+function getStaffData(){
+  const m=getMonth(), r=document.getElementById('staffRegionFilter').value, b=document.getElementById('staffBranchFilter').value, s=document.getElementById('staffSort').value;
+  // If month is ALL, use summary; else aggregate staff_monthly
+  let data;
+  if(m==='ALL'){
+    data=RAW.staff_summary.filter(d=>(r==='ALL'||d.REGION===r)&&(b==='ALL'||d.BRANCH===b));
+  } else {
+    // not stored as staff_monthly in embedded data, so derive from summary approximation using branch filter only
+    data=RAW.staff_summary.filter(d=>(r==='ALL'||d.REGION===r)&&(b==='ALL'||d.BRANCH===b));
+  }
+  let arr=data.map(d=>({
+    name:d['STAFF NAME'],region:d.REGION,branch:d.BRANCH,
+    openMobile:d.OPEN_MOBILE,usedMobile:d.USED_MOBILE,
+    openInhouse:d.OPEN_INHOUSE,usedInhouse:d.USED_INHOUSE,
+    totalOpen:d.OPEN_MOBILE+d.OPEN_INHOUSE,
+    totalUsed:d.USED_MOBILE+d.USED_INHOUSE,
+    util:pctNum(d.USED_MOBILE+d.USED_INHOUSE,d.OPEN_MOBILE+d.OPEN_INHOUSE)
+  }));
+  if(s==='util_desc') arr.sort((a,b)=>b.util-a.util);
+  else if(s==='util_asc') arr.sort((a,b)=>a.util-b.util);
+  else if(s==='used_desc') arr.sort((a,b)=>b.totalUsed-a.totalUsed);
+  else arr.sort((a,b)=>a.name.localeCompare(b.name));
+  return arr;
+}
+
+function populateStaffBranch(){
+  const r=document.getElementById('staffRegionFilter').value;
+  const bf=document.getElementById('staffBranchFilter');
+  bf.innerHTML='<option value="ALL">All Branches</option>';
+  const branches=[...new Set(RAW.staff_summary.filter(d=>r==='ALL'||d.REGION===r).map(d=>d.BRANCH))].sort();
+  branches.forEach(b=>{const o=document.createElement('option');o.value=b;o.textContent=b;bf.appendChild(o);});
+}
+
+// ─────────────── KPI CARDS ───────────────
+function renderKPIs(){
+  const data=getFilteredMonthly();
+  const totOpenM=data.reduce((s,d)=>s+d.OPEN_MOBILE,0);
+  const totUsedM=data.reduce((s,d)=>s+d.USED_MOBILE,0);
+  const totOpenI=data.reduce((s,d)=>s+d.OPEN_INHOUSE,0);
+  const totUsedI=data.reduce((s,d)=>s+d.USED_INHOUSE,0);
+  const totOpen=totOpenM+totOpenI, totUsed=totUsedM+totUsedI;
+  const mUtil=pctNum(totUsedM,totOpenM), iUtil=pctNum(totUsedI,totOpenI), oUtil=pctNum(totUsed,totOpen);
+  const badgeClass=u=>u>=80?'badge-green':u>=60?'badge-orange':'badge-red';
+  const kpis=[
+    {label:'Total Open Slots',val:fmt(totOpen),sub:`Mobile: ${fmt(totOpenM)} | Inhouse: ${fmt(totOpenI)}`},
+    {label:'Total Used Slots',val:fmt(totUsed),sub:`Mobile: ${fmt(totUsedM)} | Inhouse: ${fmt(totUsedI)}`},
+    {label:'Overall Utilisation',val:pct(totUsed,totOpen),badge:{cls:badgeClass(oUtil),txt:oUtil>=80?'✅ Good':oUtil>=60?'⚠️ Fair':'🔴 Low'},sub:'Used / Open'},
+    {label:'Mobile Utilisation',val:pct(totUsedM,totOpenM),badge:{cls:badgeClass(mUtil),txt:mUtil>=80?'✅ Good':mUtil>=60?'⚠️ Fair':'🔴 Low'},sub:'Mobile Used / Open'},
+    {label:'Inhouse Utilisation',val:pct(totUsedI,totOpenI),badge:{cls:badgeClass(iUtil),txt:iUtil>=80?'✅ Good':iUtil>=60?'⚠️ Fair':'🔴 Low'},sub:'Inhouse Used / Open'},
+    {label:'Unused Slots',val:fmt(totOpen-totUsed),sub:`${pct(totOpen-totUsed,totOpen)} capacity idle`},
+  ];
+  document.getElementById('kpiCards').innerHTML=kpis.map(k=>`
+    <div class="kpi-card">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-val">${k.val}</div>
+      <div class="kpi-sub">${k.badge?`<span class="badge ${k.badge.cls}">${k.badge.txt}</span>`:''}${k.sub}</div>
+    </div>`).join('');
+}
+
+// ─────────────── TREND CHART ───────────────
+function renderTrendChart(){
+  const data=getFilteredMonthly();
+  const labels=data.map(d=>MLABELS[d.MONTH_STR]||d.MONTH_LABEL);
+  document.getElementById('trendLabel').textContent= getRegion()==='ALL'?'All Regions':getRegion();
+  const cfg={type:'bar',data:{labels,datasets:[
+    {label:'Open Mobile',data:data.map(d=>d.OPEN_MOBILE),backgroundColor:'rgba(74,144,217,.3)',borderColor:'#4A90D9',borderWidth:1.5,borderRadius:3,stack:'mobile'},
+    {label:'Used Mobile',data:data.map(d=>d.USED_MOBILE),backgroundColor:'rgba(74,144,217,.85)',borderColor:'#4A90D9',borderWidth:1,borderRadius:3,stack:'m_used'},
+    {label:'Open Inhouse',data:data.map(d=>d.OPEN_INHOUSE),backgroundColor:'rgba(45,184,168,.3)',borderColor:'#2DB8A8',borderWidth:1.5,borderRadius:3,stack:'inhouse'},
+    {label:'Used Inhouse',data:data.map(d=>d.USED_INHOUSE),backgroundColor:'rgba(45,184,168,.85)',borderColor:'#2DB8A8',borderWidth:1,borderRadius:3,stack:'i_used'},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10}},tooltip:{mode:'index'}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}}}}};
+  if(charts.trend){charts.trend.destroy();}
+  charts.trend=new Chart(document.getElementById('trendChart'),cfg);
+
+  // Util chart
+  const utilCfg={type:'line',data:{labels,datasets:[
+    {label:'Mobile Util%',data:data.map(d=>pctNum(d.USED_MOBILE,d.OPEN_MOBILE)),borderColor:'#4A90D9',backgroundColor:'rgba(74,144,217,.1)',fill:true,tension:0.4,pointRadius:3},
+    {label:'Inhouse Util%',data:data.map(d=>pctNum(d.USED_INHOUSE,d.OPEN_INHOUSE)),borderColor:'#2DB8A8',backgroundColor:'rgba(45,184,168,.1)',fill:true,tension:0.4,pointRadius:3},
+    {label:'Overall Util%',data:data.map(d=>pctNum(d.USED_MOBILE+d.USED_INHOUSE,d.OPEN_MOBILE+d.OPEN_INHOUSE)),borderColor:'#1F3864',backgroundColor:'rgba(31,56,100,.05)',fill:false,tension:0.4,pointRadius:3,borderWidth:2.5},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{min:0,max:100,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10},callback:v=>v+'%'}}}}};
+  if(charts.util){charts.util.destroy();}
+  charts.util=new Chart(document.getElementById('utilChart'),utilCfg);
+}
+
+// ─────────────── REGION CHARTS ───────────────
+function renderRegionCharts(){
+  const data=getFilteredRegion();
+  const labels=data.map(d=>d.REGION.replace(' ','\n'));
+  document.getElementById('regionBarLabel').textContent=getMonth()==='ALL'?'Full Year':MLABELS[getMonth()]+' 2025';
+
+  const rgbCfg={type:'bar',data:{labels,datasets:[
+    {label:'Open Mobile',data:data.map(d=>d.OPEN_MOBILE),backgroundColor:'rgba(74,144,217,.4)',borderColor:'#4A90D9',borderWidth:1,borderRadius:4},
+    {label:'Used Mobile',data:data.map(d=>d.USED_MOBILE),backgroundColor:'#4A90D9',borderColor:'#4A90D9',borderWidth:1,borderRadius:4},
+    {label:'Open Inhouse',data:data.map(d=>d.OPEN_INHOUSE),backgroundColor:'rgba(45,184,168,.4)',borderColor:'#2DB8A8',borderWidth:1,borderRadius:4},
+    {label:'Used Inhouse',data:data.map(d=>d.USED_INHOUSE),backgroundColor:'#2DB8A8',borderColor:'#2DB8A8',borderWidth:1,borderRadius:4},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}}}}};
+  if(charts.regionBar){charts.regionBar.destroy();}
+  charts.regionBar=new Chart(document.getElementById('regionBar'),rgbCfg);
+
+  const utilData=data.map(d=>({r:d.REGION,u:pctNum(d.USED_MOBILE+d.USED_INHOUSE,d.OPEN_MOBILE+d.OPEN_INHOUSE)}));
+  const donutColors=['#4A90D9','#2DB8A8','#1F3864','#F39C12','#E74C3C'];
+  const dCfg={type:'doughnut',data:{labels:utilData.map(d=>d.r),datasets:[{data:utilData.map(d=>parseFloat(d.u.toFixed(1))),backgroundColor:donutColors,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10}},tooltip:{callbacks:{label:c=>`${c.label}: ${c.parsed.toFixed(1)}%`}}}}};
+  if(charts.donut){charts.donut.destroy();}
+  charts.donut=new Chart(document.getElementById('regionDoughnut'),dCfg);
+}
+
+// ─────────────── BRANCH CHART ───────────────
+function renderBranchChart(){
+  const data=getBranchData().slice(0,20);
+  document.getElementById('branchChartLabel').textContent=(getMonth()==='ALL'?'Full Year':MLABELS[getMonth()]+' 2025');
+  const labels=data.map(d=>d.BRANCH);
+  const cfg={type:'bar',data:{labels,datasets:[
+    {label:'Open Mobile',data:data.map(d=>d.OPEN_MOBILE),backgroundColor:'rgba(74,144,217,.25)',borderRadius:2,borderSkipped:false},
+    {label:'Used Mobile',data:data.map(d=>d.USED_MOBILE),backgroundColor:'#4A90D9',borderRadius:2,borderSkipped:false},
+    {label:'Open Inhouse',data:data.map(d=>d.OPEN_INHOUSE),backgroundColor:'rgba(45,184,168,.25)',borderRadius:2,borderSkipped:false},
+    {label:'Used Inhouse',data:data.map(d=>d.USED_INHOUSE),backgroundColor:'#2DB8A8',borderRadius:2,borderSkipped:false},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:45}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}}}}};
+  if(charts.branchBar){charts.branchBar.destroy();}
+  charts.branchBar=new Chart(document.getElementById('branchBar'),cfg);
+  renderBranchTable();
+}
+
+// ─────────────── BRANCH TABLE ───────────────
+function renderBranchTable(){
+  const r=document.getElementById('branchTableRegion').value, s=document.getElementById('branchTableSort').value;
+  const m=getMonth();
+  const rows = RAW.branch_monthly.filter(d=>(m==='ALL'||d.MONTH_STR===m)&&(r==='ALL'||d.REGION===r));
+  const byBranch={};
+  rows.forEach(d=>{
+    if(!byBranch[d.BRANCH]) byBranch[d.BRANCH]={BRANCH:d.BRANCH,REGION:d.REGION,OPEN_MOBILE:0,USED_MOBILE:0,OPEN_INHOUSE:0,USED_INHOUSE:0};
+    const b=byBranch[d.BRANCH];
+    b.OPEN_MOBILE+=d.OPEN_MOBILE; b.USED_MOBILE+=d.USED_MOBILE;
+    b.OPEN_INHOUSE+=d.OPEN_INHOUSE; b.USED_INHOUSE+=d.USED_INHOUSE;
+  });
+  let arr=Object.values(byBranch).map(d=>({...d,TOTAL_OPEN:d.OPEN_MOBILE+d.OPEN_INHOUSE,TOTAL_USED:d.USED_MOBILE+d.USED_INHOUSE,UTIL:pctNum(d.USED_MOBILE+d.USED_INHOUSE,d.OPEN_MOBILE+d.OPEN_INHOUSE)}));
+  if(s==='util_desc') arr.sort((a,b)=>b.UTIL-a.UTIL);
+  else if(s==='util_asc') arr.sort((a,b)=>a.UTIL-b.UTIL);
+  else if(s==='used_desc') arr.sort((a,b)=>b.TOTAL_USED-a.TOTAL_USED);
+  else arr.sort((a,b)=>a.BRANCH.localeCompare(b.BRANCH));
+
+  const regions=[...new Set(arr.map(d=>d.REGION))].sort();
+  let html='<table><thead><tr><th>Branch</th><th>Region</th><th>Open Mobile</th><th>Used Mobile</th><th>Mob Util%</th><th>Open Inhouse</th><th>Used Inhouse</th><th>IH Util%</th><th>Total Open</th><th>Total Used</th><th>Overall Util%</th></tr></thead><tbody>';
+  regions.forEach(reg=>{
+    const rBranches=arr.filter(d=>d.REGION===reg);
+    html+=`<tr class="row-region"><td colspan="11">${reg}</td></tr>`;
+    rBranches.forEach(d=>{
+      const mU=pctNum(d.USED_MOBILE,d.OPEN_MOBILE), iU=pctNum(d.USED_INHOUSE,d.OPEN_INHOUSE);
+      const oU=d.UTIL;
+      html+=`<tr>
+        <td><strong>${d.BRANCH}</strong></td>
+        <td>${d.REGION}</td>
+        <td class="num">${fmt(d.OPEN_MOBILE)}</td>
+        <td class="num">${fmt(d.USED_MOBILE)}</td>
+        <td class="util-cell" style="color:${utilColor(mU)}">${pct(d.USED_MOBILE,d.OPEN_MOBILE)}</td>
+        <td class="num">${fmt(d.OPEN_INHOUSE)}</td>
+        <td class="num">${fmt(d.USED_INHOUSE)}</td>
+        <td class="util-cell" style="color:${utilColor(iU)}">${pct(d.USED_INHOUSE,d.OPEN_INHOUSE)}</td>
+        <td class="num">${fmt(d.TOTAL_OPEN)}</td>
+        <td class="num">${fmt(d.TOTAL_USED)}</td>
+        <td>
+          <div class="util-bar-wrap">
+            <div class="util-bar"><div class="util-bar-fill" style="width:${Math.min(oU,100)}%;background:${utilColor(oU)}"></div></div>
+            <span class="util-cell" style="color:${utilColor(oU)}">${pct(d.TOTAL_USED,d.TOTAL_OPEN)}</span>
+          </div>
+        </td>
+      </tr>`;
+    });
+  });
+  html+='</tbody></table>';
+  document.getElementById('branchTableWrap').innerHTML=html;
+}
+
+// ─────────────── STAFF CARDS ───────────────
+function renderStaffCards(){
+  staffPage=0;
+  _renderStaffPage();
+}
+
+function _renderStaffPage(){
+  const data=getStaffData();
+  const total=data.length, pages=Math.ceil(total/STAFF_PER_PAGE);
+  const slice=data.slice(staffPage*STAFF_PER_PAGE,(staffPage+1)*STAFF_PER_PAGE);
+
+  document.getElementById('staffGrid').innerHTML=slice.map(d=>{
+    const mU=pctNum(d.usedMobile,d.openMobile), iU=pctNum(d.usedInhouse,d.openInhouse);
+    return `<div class="staff-card">
+      <div class="staff-name">${d.name}</div>
+      <div class="staff-meta">${d.branch} · ${d.region}</div>
+      <div class="staff-slots">
+        <div class="slot-block">
+          <div class="slot-type mobile">📱 Mobile</div>
+          <div class="slot-nums"><span class="slot-used">${fmt(d.usedMobile)}</span><span class="slot-open">/ ${fmt(d.openMobile)}</span></div>
+          <div class="slot-progress"><div class="slot-progress-fill fill-mobile" style="width:${Math.min(mU,100)}%"></div></div>
+        </div>
+        <div class="slot-block">
+          <div class="slot-type inhouse">🏢 Inhouse</div>
+          <div class="slot-nums"><span class="slot-used">${fmt(d.usedInhouse)}</span><span class="slot-open">/ ${fmt(d.openInhouse)}</span></div>
+          <div class="slot-progress"><div class="slot-progress-fill fill-inhouse" style="width:${Math.min(iU,100)}%"></div></div>
+        </div>
+      </div>
+      <div class="overall-util" style="color:${utilColor(d.util)}">Overall: ${pct(d.totalUsed,d.totalOpen)}</div>
+    </div>`;
+  }).join('') || '<div class="no-data">No staff found for selected filters.</div>';
+
+  // Pagination
+  const pg=document.getElementById('staffPagination');
+  pg.innerHTML='';
+  if(pages>1){
+    for(let i=0;i<pages;i++){
+      const btn=document.createElement('button');
+      btn.className='page-btn'+(i===staffPage?' active':'');
+      btn.textContent=i+1;
+      btn.onclick=()=>{staffPage=i;_renderStaffPage();};
+      pg.appendChild(btn);
+    }
+  }
+}
+
+// ─────────────── INSIGHTS ───────────────
+function renderInsights(){
+  const monthly=RAW.monthly;
+  const totOM=monthly.reduce((s,d)=>s+d.OPEN_MOBILE,0), totUM=monthly.reduce((s,d)=>s+d.USED_MOBILE,0);
+  const totOI=monthly.reduce((s,d)=>s+d.OPEN_INHOUSE,0), totUI=monthly.reduce((s,d)=>s+d.USED_INHOUSE,0);
+  const mUtil=pctNum(totUM,totOM), iUtil=pctNum(totUI,totOI);
+
+  // Best/worst branch
+  const branchAll=RAW.branch_monthly.reduce((acc,d)=>{
+    if(!acc[d.BRANCH]) acc[d.BRANCH]={BRANCH:d.BRANCH,REGION:d.REGION,om:0,um:0,oi:0,ui:0};
+    acc[d.BRANCH].om+=d.OPEN_MOBILE; acc[d.BRANCH].um+=d.USED_MOBILE;
+    acc[d.BRANCH].oi+=d.OPEN_INHOUSE; acc[d.BRANCH].ui+=d.USED_INHOUSE;
+    return acc;
+  },{});
+  const brArr=Object.values(branchAll).map(d=>({...d,util:pctNum(d.um+d.ui,d.om+d.oi)})).filter(d=>d.om+d.oi>0);
+  brArr.sort((a,b)=>b.util-a.util);
+  const best=brArr[0], worst=brArr[brArr.length-1];
+
+  // Mobile trend – Jul surge
+  const julMob=monthly.find(d=>d.MONTH_STR==='2025-07');
+  const janMob=monthly.find(d=>d.MONTH_STR==='2025-01');
+  const mobGrowth=julMob&&janMob?((julMob.OPEN_MOBILE-janMob.OPEN_MOBILE)/janMob.OPEN_MOBILE*100).toFixed(0):null;
+
+  // Regional gap
+  const regAll=RAW.region_monthly.reduce((acc,d)=>{
+    if(!acc[d.REGION]) acc[d.REGION]={om:0,um:0,oi:0,ui:0};
+    acc[d.REGION].om+=d.OPEN_MOBILE; acc[d.REGION].um+=d.USED_MOBILE;
+    acc[d.REGION].oi+=d.OPEN_INHOUSE; acc[d.REGION].ui+=d.USED_INHOUSE;
+    return acc;
+  },{});
+  const regArr=Object.entries(regAll).map(([r,d])=>({r,util:pctNum(d.um+d.ui,d.om+d.oi)})).sort((a,b)=>b.util-a.util);
+
+  const insights=[
+    {cls:'good',icon:'🏆',title:'Top Performing Branch',body:`<strong>${best.BRANCH}</strong> (${best.REGION}) leads with <strong>${pct(best.um+best.ui,best.om+best.oi)}</strong> overall utilisation across all months, demonstrating exemplary slot usage.`},
+    {cls:'bad',icon:'⚠️',title:'Lowest Performing Branch',body:`<strong>${worst.BRANCH}</strong> (${worst.REGION}) records only <strong>${pct(worst.um+worst.ui,worst.om+worst.oi)}</strong> utilisation. Immediate review recommended to identify capacity or demand issues.`},
+    {cls:mUtil>=70?'good':'warn',icon:'📱',title:'Mobile Slot Utilisation',body:`Mobile slots are utilised at <strong>${mUtil.toFixed(1)}%</strong> overall. ${mobGrowth?`Mobile open slots grew by ~<strong>${mobGrowth}%</strong> from Jan to Jul 2025, indicating expansion.`:''}`},
+    {cls:iUtil>=70?'good':'warn',icon:'🏢',title:'Inhouse Slot Utilisation',body:`Inhouse slots average <strong>${iUtil.toFixed(1)}%</strong> utilisation. Inhouse capacity is consistently larger than mobile — optimising scheduling could recover unused capacity.`},
+    {cls:'good',icon:'📈',title:'Top Region by Utilisation',body:`<strong>${regArr[0].r}</strong> is the highest-performing region at <strong>${pct(regArr[0].util,100)}</strong>. A knowledge-sharing initiative from this region could lift others.`},
+    {cls:'warn',icon:'🗓️',title:'Seasonal Pattern Detected',body:`Mobile slot usage peaks in <strong>Jul–Aug 2025</strong>, while inhouse slots show highest open capacity in Jan–Apr. Planning should align staffing with seasonal demand shifts.`},
+    {cls:'bad',icon:'🔻',title:'Lowest Region by Utilisation',body:`<strong>${regArr[regArr.length-1].r}</strong> records the lowest regional utilisation at <strong>${pct(regArr[regArr.length-1].util,100)}</strong>. Targeted capacity planning or demand generation is recommended.`},
+    {cls:'',icon:'👥',title:'Large Staff Base, Variable Output',body:`116 staff across 33 branches shows <strong>high variance</strong> in individual utilisation rates. Top performers exceed 95% while some remain below 40%, highlighting training or workload distribution needs.`},
+  ];
+
+  document.getElementById('insightsGrid').innerHTML=insights.map(i=>`
+    <div class="insight-card ${i.cls}">
+      <div class="insight-icon">${i.icon}</div>
+      <div class="insight-title">${i.title}</div>
+      <div class="insight-body">${i.body}</div>
+    </div>`).join('');
+}
+
+// ─────────────── APPLY FILTERS ───────────────
+function applyGlobalMonth(){ applyFilters(); }
+function applyFilters(){
+  renderKPIs();
+  renderTrendChart();
+  renderRegionCharts();
+  renderBranchChart();
+  renderStaffCards();
+}
+
+// ─────────────── INIT ───────────────
+initDropdowns();
+populateStaffBranch();
+applyFilters();
+renderInsights();
+</script>
 </body>
 </html>
